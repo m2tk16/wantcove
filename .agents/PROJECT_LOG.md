@@ -2,6 +2,30 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — GitHub Actions repository guardrails configured
+
+### Stage
+
+Repository-level GitHub Actions permissions were configured by the owner after the branch-policy workflow reached Beta. Branch protection is still pending, no Production branch or resource was changed, and this documentation checkpoint has not yet been pushed.
+
+### Configured
+
+- Limited allowed workflows to actions authored in `m2tk16` repositories plus GitHub-authored actions; third-party Marketplace actions remain disabled.
+- Required actions to be pinned to full-length commit SHAs.
+- Kept the default workflow token at read-only repository contents and packages permissions.
+- Kept GitHub Actions from creating or approving pull requests and retained approval for first-time external contributors.
+
+### Verification
+
+- Amplify Beta job 12 completed BUILD, DEPLOY, and VERIFY successfully for commit `de96f41`; its clean hosted gate passed all 34 tests, the production frontend build, backend checks, and a production dependency audit reporting 0 vulnerabilities.
+- The owner confirmed both repository settings sections were saved. GitHub Actions does not retroactively run the workflow for the earlier push, so a new Beta commit is required to prove the hosted `Branch policy check` before it can be required by branch rules.
+- This checkpoint changes repository operations documentation only. It does not alter runtime behavior, authentication, stored data, cookies, affiliate behavior, outbound links, or Terms/Privacy content.
+
+### Next
+
+- Push this documentation checkpoint to Beta only after explicit owner approval, then verify both GitHub Actions and Amplify complete successfully.
+- After the check name exists in GitHub, protect `beta` and `main` with required pull requests, required `Branch policy check`, deletion protection, force-push protection, and no bypass.
+
 ## 2026-08-07 — Branch-policy CI guardrail
 
 ### Stage
