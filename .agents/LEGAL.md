@@ -32,3 +32,12 @@ Update the Privacy Policy before materially changing personal data collection, a
 3. Update dates, policies, tests, and the project log together.
 4. Record operator identity, monitored contact channel, governing jurisdiction, and counsel review before Beta enables accounts or commercial links.
 5. Block Production when required legal details, consent flows, disclosures, or jurisdiction-specific notices are incomplete.
+
+## Authoritative references reviewed 2026-08-06
+
+- FTC Endorsement Guides Q&A: https://consumer.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking
+- FTC privacy and security guidance: https://www.ftc.gov/business-guidance/privacy-security
+- Amazon Associates Operating Agreement: https://affiliate-program.amazon.com/help/operating/agreement
+- Amazon Associates disclosure help: https://affiliate-program.amazon.com/help/node/topic/GPXFHVYZMTGPUMPE
+
+Recheck current program terms and applicable law before activation; references can change.

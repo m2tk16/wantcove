@@ -2,6 +2,30 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Initial Git branches published
+
+### Stage
+
+Verified source is published to GitHub; Amplify is not connected and nothing is deployed.
+
+### Updated
+
+- Created root commit `1dd0158` on `main` and published it to `m2tk16/wantcove`.
+- Created and published `beta` at the same verified commit.
+- Confirmed AWS account `178450627339` is available and contains no existing WantCove Amplify app.
+- Attempted the Amplify Console connection; interactive AWS sign-in is required in the in-app browser before repository authorization can continue.
+
+### Verification
+
+- Both remote branches resolved to the same release candidate when published.
+- The full release gate passed before branch creation.
+
+### Next
+
+- Configure required GitHub checks and branch protection for `beta` and `main`.
+- Sign in to AWS Amplify Console, authorize the GitHub repository, and connect `beta` first with automatic deployment held until settings are reviewed.
+- Add `main` as Production only after Beta acceptance and legal release blockers are cleared.
+
 ## 2026-08-06 — Modular architecture and legal baseline
 
 ### Stage
