@@ -2,6 +2,34 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Hosted public-catalog decoding repair
+
+### Stage
+
+Local corrective candidate discovered during authenticated Beta catalog acceptance. Production remains unchanged, the temporary test record is archived, and no correction has been committed, pushed, or deployed.
+
+### Observed
+
+- Administrator first sign-in and TOTP enrollment succeeded, and the hosted `/admin` route received the server-issued `ADMINS` claim.
+- Create, edit, draft isolation, publish, and archive operations succeeded for an isolated Beta-only record with no Amazon identifier or retailer URL.
+- After publication, the administrative view showed `PUBLISHED` and a direct API-key GraphQL request returned the sanitized product, but the public React catalog still omitted it and its product route remained 404.
+- AppSync serializes the custom `AWSJSON` result as a JSON string. The thin public client incorrectly accepted only an already-decoded array and silently treated the deployed response as an empty catalog.
+
+### Updated
+
+- Added a narrow public-catalog codec that accepts both deployed AWSJSON strings and already-decoded test payloads, projects only public product fields, filters malformed records, and rejects malformed JSON instead of silently hiding every managed product.
+- Updated the public client to use the codec and added focused regression coverage for the deployed response shape, public projection, malformed-record filtering, and invalid JSON.
+
+### Verification
+
+- The focused codec suite passes all 3 tests. `npm run check:fast` passes steering and backend-security invariants, warning-free lint, and all 31 tests; the production frontend build and TypeScript compilation also pass. Hosted Beta acceptance remains pending.
+- Legal review: this correction changes response decoding only. It does not change authentication, personal-data handling, cookies, affiliate behavior, outbound links, or policy text, so it does not trigger a Terms or Privacy update.
+
+### Next
+
+- Review the correction and request approval before committing or pushing it to Beta.
+- After a successful Beta deployment, republish the isolated record and complete public rendering, managed-like, archive, guarded-delete, and deletion-isolation acceptance.
+
 ## 2026-08-07 — Secure administration deployed to Beta
 
 ### Stage

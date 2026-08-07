@@ -38,6 +38,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 Move items here with a date, outcome, and log reference when implemented or rejected.
 
+- 2026-08-07 — P2 Bug / High value, low effort: added strict AWSJSON decoding for the public managed catalog after hosted acceptance proved AppSync returns the custom payload as a JSON string; local verification is complete and Beta deployment is pending.
 - 2026-08-06 — P1 Security / High value, low effort: blocked `Collection.owner` reassignment with field-level authorization and added a fast-gate invariant check after Amplify surfaced the default behavior during deployment.
 - 2026-08-06 — P1 Security / High value, low effort: added explicit preference controls and a footer-accessible privacy panel; declined preferences remain session-only and no advertising cookie is introduced.
 - 2026-08-06 — P1 Security / High value, medium effort: added anonymous product likes through least-privilege GraphQL operations, server-derived Cognito guest identities, bounded DynamoDB retention, and backend invariant checks. Raw IP addresses are not like identifiers.
