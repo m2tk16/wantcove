@@ -1,0 +1,98 @@
+# WantCove project log
+
+This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
+
+## 2026-08-06 — Modular architecture and legal baseline
+
+### Stage
+
+Pre-commit release candidate; no remote branch, AWS resource, or deployment created.
+
+### Updated
+
+- Added enforceable modular-architecture and legal-policy steering documents.
+- Refactored the single-file catalog into thin app composition, feature-owned catalog and legal modules, shared layout/navigation, typed product data, and reusable product components.
+- Added footer-only Terms of Service and Privacy Policy routes with effective dates and pre-release blockers.
+- Added a clear product-level affiliate notice explaining commission, off-site navigation, retailer control, and privacy boundaries.
+- Preserved inactive retailer actions until affiliate enrollment, destinations, disclosure language, and external-link security are approved.
+- Removed unused Vite starter media and standardized repository text line endings.
+
+### Decisions
+
+- Use FTC-aligned, close-to-link disclosures rather than relying on footer policies alone.
+- Do not publish an Amazon Associates identification statement until WantCove is actually enrolled and uses Amazon Special Links.
+- Block Beta accounts/commercial links and Production until operator identity, monitored contact method, jurisdiction, and qualified legal review are recorded.
+
+### Verification
+
+- `npm run check:full` passed: steering verification, clean Oxlint, 5 route/legal/interaction tests, production build, backend TypeScript validation, and production dependency audit.
+- Production dependency audit: 0 vulnerabilities.
+- Generated product PNGs remain 1.7–2.2 MB each; optimization is tracked before Beta acceptance.
+
+### Next
+
+- Add the legal operator identity, contact channel, and jurisdiction.
+- Complete the full release gate, then create the initial Git history and remote `beta`/`main` branches.
+- Connect Amplify only after the remote branches exist and branch protections are configured.
+
+## 2026-08-06 — Discovery catalog mockup pass
+
+### Stage
+
+Local UI foundation; no commit, remote branch, AWS resource, or deployment created.
+
+### Updated
+
+- Reworked the interface into a responsive curated-product discovery catalog based on the supplied desktop and mobile mockups.
+- Added Home, Categories, New arrivals, Top picks, Deals, product detail, mobile drawer, and 404 experiences.
+- Generated and added four original product images for the globe lamp, dumbbells, pizza oven, and wireless earbuds.
+- Documented the two-stage Amplify topology: `beta` for acceptance and `main` for production.
+- Expanded tests to cover catalog content, product detail disclosure, categories, 404, and the mobile menu.
+
+### Decisions
+
+- Use one React application and one Amplify Gen 2 app with isolated branch backends for beta and production.
+- Keep retailer actions inert until affiliate destinations, disclosure language, and outbound-link security are approved.
+- Keep owner-scoped saved collections as a later authenticated feature behind the public catalog.
+
+### Verification
+
+- `npm run check:fast` passed: steering verification, Oxlint, and 4 catalog route/interaction tests.
+
+### Next
+
+- Review the product direction and copy.
+- Create and push the initial `main` and `beta` branches only after explicit approval.
+- Connect the Amplify app to both branches, then add stage-specific smoke tests and SPA rewrites.
+
+## 2026-08-06 — Foundation and guardrails
+
+### Stage
+
+Local foundation; not committed, pushed, sandboxed, or deployed.
+
+### Updated
+
+- Replaced the Vite demo with a responsive WantCove route shell for Home, Discover, Collections, About, Sign in, and 404 states.
+- Added router and component test dependencies plus route coverage.
+- Replaced the guest-writable Todo schema with an owner-only Collection schema using Cognito user-pool authorization.
+- Added steering instructions, prioritized backlog, fast/full checks, CI, and an Amplify Gen 2 build specification.
+
+### Decisions
+
+- Keep the initial UI data-free until a personal Amplify sandbox generates client outputs.
+- Treat each user’s collections as private by default.
+- Use fast checks for routine changes and the full check for releases, dependencies, and backend updates.
+
+### Verification
+
+- `npm run check:full` passed: steering verification, Oxlint, 3 route tests, production build, backend TypeScript validation, and production dependency audit.
+- Production dependency audit: 0 vulnerabilities.
+- Removed React Router after its available versions produced high-severity advisories; replaced it with a small tested browser-history router.
+- Full development audit still reports 20 advisories in Amplify/CDK code-generation tooling. These do not ship in the browser bundle; track upstream fixes before cloud deployment and do not run backend tooling on untrusted branches.
+
+### Next
+
+- Review the supplied visual mockups when they are available in the workspace.
+- Create the first Amplify app/branch and personal sandbox only after the initial commit is reviewed.
+- Connect Cognito UI and live Collection data after sandbox outputs exist.

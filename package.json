@@ -1,0 +1,42 @@
+{
+  "name": "wantcove",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest run --pool=threads --maxWorkers=1",
+    "test:watch": "vitest",
+    "verify:steering": "node scripts/verify-steering.mjs",
+    "check:backend": "tsc -p amplify/tsconfig.json --noEmit",
+    "check:fast": "npm run verify:steering && npm run lint && npm run test",
+    "check:full": "npm run check:fast && npm run build && npm run check:backend && npm audit --omit=dev --audit-level=high"
+  },
+  "dependencies": {
+    "aws-amplify": "^6.20.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.24.0",
+    "@aws-amplify/backend-cli": "^1.9.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "aws-cdk-lib": "^2.244.0",
+    "constructs": "^10.8.1",
+    "esbuild": "^0.28.1",
+    "jsdom": "^29.1.1",
+    "oxlint": "^1.75.0",
+    "tsx": "^4.23.9",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
+  }
+}
