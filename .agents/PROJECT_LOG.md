@@ -2,6 +2,34 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Managed catalog Beta acceptance completed
+
+### Stage
+
+Hosted Beta acceptance completed for catalog correction commit `b36fc4c` and Amplify job 11. Production remains unchanged, no commercial retailer link was enabled, and all temporary acceptance data was removed.
+
+### Verified
+
+- Amplify job 11 completed BUILD, DEPLOY, and VERIFY successfully after a clean install, all 31 tests, production frontend compilation, backend type checks, backend deployment, and a production dependency audit reporting 0 vulnerabilities.
+- The MFA-protected administrator session carried the server-issued `ADMINS` claim and completed create, edit, draft isolation, publish, archive, and two-step guarded-delete operations against an isolated product with no ASIN or retailer URL.
+- A draft returned the public 404 experience. After publication, the corrected AWSJSON decoder rendered the managed product on its direct route with the retailer action disabled and the nearby affiliate disclosure visible.
+- After the administrator signed out, an explicitly consented anonymous Like persisted across a full reload, and Unlike removed the persisted state across another reload.
+- After archive and guarded delete, the admin catalog was empty, public GraphQL returned an empty list and `null` for the deleted slug, the Product table returned no item, the product-like table returned a count of 0 for the slug, and the public route returned the 404 experience.
+
+### Observed edge case
+
+- With the private Cognito administrator session active, the Identity Pool like client fell back to session-only state before reaching the like Function. The intended anonymous flow is healthy, but authenticated-admin like synchronization needs investigation before public accounts or routine signed-in browsing are introduced.
+
+### Legal and data review
+
+- The correction changes only deployed AWSJSON decoding and does not alter authentication scope, cookie choices, personal-data processing, affiliate behavior, or outbound links. No Terms or Privacy update is triggered.
+- The temporary Product and like rows were deleted. Existing starter fixtures, Collection data, and Production resources were not changed.
+
+### Next
+
+- Keep the authenticated-admin Identity Pool like edge case in the bug backlog and resolve it before public account support.
+- Migrate the four reviewed starter fixtures into Product storage as the next high-value GraphQL catalog slice, while keeping affiliate links disabled.
+
 ## 2026-08-07 — Hosted public-catalog decoding repair
 
 ### Stage
