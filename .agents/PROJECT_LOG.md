@@ -2,6 +2,35 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Initial Amplify deployments verified
+
+### Stage
+
+Beta and Production are deployed from the same verified commit with separate Amplify Gen 2 backend stacks.
+
+### Updated
+
+- Published repair commit `3a6ca2c` to both `beta` and `main`.
+- Completed `beta` job 2 and `main` job 2 successfully across BUILD, DEPLOY, and VERIFY.
+- Labeled the Amplify `beta` branch as stage `BETA`; `main` remains `PRODUCTION`, with auto-build enabled for both.
+- Replaced the inherited `404-200` fallback with AWS's documented asset-aware SPA rewrite to `/index.html` using status `200`.
+- Preserved the existing temporary redirect from `https://wantcove.com` to `https://www.wantcove.com`.
+- Recorded the hosted stage URLs and Amplify app ID in `.agents/ENVIRONMENTS.md`.
+
+### Verification
+
+- Local `npm run check:full` passed before publication: steering, lint, 5 tests, production build, backend typecheck, and 0 production dependency vulnerabilities.
+- Amplify's Beta build log independently passed the same checks before deploying the Gen 2 auth and owner-scoped data resources.
+- `https://beta.dzrkss4yfifm3.amplifyapp.com` and `https://main.dzrkss4yfifm3.amplifyapp.com` returned HTTP 200.
+- Direct product, Terms, and Privacy routes returned HTTP 200 on both stages after the SPA rewrite correction.
+- Rendered-browser checks passed for the Beta product route and Production Privacy route with no console warnings or errors.
+
+### Next
+
+- Configure required GitHub checks and branch protection for both persistent branches.
+- Keep commercial retailer actions disabled until affiliate enrollment, approved destinations, disclosures, and legal release blockers are resolved.
+- Promote future changes through Beta acceptance before Production rather than pushing both persistent branches together.
+
 ## 2026-08-06 — Initial Amplify deployment repair
 
 ### Stage
