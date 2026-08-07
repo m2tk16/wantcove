@@ -40,7 +40,9 @@ const productLikesTable = new Table(productLikesStack, 'ProductLikesTable', {
   partitionKey: { name: 'productSlug', type: AttributeType.STRING },
   sortKey: { name: 'actorKey', type: AttributeType.STRING },
   billingMode: BillingMode.PAY_PER_REQUEST,
-  pointInTimeRecovery: true,
+  pointInTimeRecoverySpecification: {
+    pointInTimeRecoveryEnabled: true,
+  },
   timeToLiveAttribute: 'expiresAt',
 });
 

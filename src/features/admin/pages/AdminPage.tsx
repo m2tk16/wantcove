@@ -16,6 +16,10 @@ export function AdminPage({ auth = adminAuthClient, catalog = adminProductClient
   const [error, setError] = useState<string>()
 
   useEffect(() => {
+    if (!auth.isAvailable) {
+      setSession(null)
+      return
+    }
     let active = true
     void auth.current().then((current) => { if (active) setSession(current) })
     return () => { active = false }

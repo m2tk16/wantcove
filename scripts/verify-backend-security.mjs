@@ -62,7 +62,7 @@ const backendRequirements = [
   ['Product likes must partition by product slug', /partitionKey\s*:\s*\{\s*name\s*:\s*['"]productSlug['"]/],
   ['Product likes must sort by server-derived actor key', /sortKey\s*:\s*\{\s*name\s*:\s*['"]actorKey['"]/],
   ['Product likes must expire automatically', /timeToLiveAttribute\s*:\s*['"]expiresAt['"]/],
-  ['Product likes must have point-in-time recovery', /pointInTimeRecovery\s*:\s*true/],
+  ['Product likes must have point-in-time recovery', /pointInTimeRecoverySpecification\s*:\s*\{\s*pointInTimeRecoveryEnabled\s*:\s*true/],
   ['Only the product-likes Function may access the table', /productLikesTable\.grantReadWriteData\(productLikesLambda\)/],
   ['The product-likes table name must be injected by the backend', /backend\.productLikesFunction\.addEnvironment\(['"]PRODUCT_LIKES_TABLE_NAME['"]\s*,\s*productLikesTable\.tableName\)/],
 ]
@@ -118,6 +118,10 @@ if (!/PRODUCT_LIKE_TTL_SECONDS\s*=\s*60\s*\*\s*60\s*\*\s*24\s*\*\s*180/.test(pro
 
 if (!/timeoutSeconds\s*:\s*10/.test(productLikesFunctionResource)) {
   failures.push('Product-like Function must retain a bounded execution timeout')
+}
+
+if (![productLikesFunctionResource, manageProductsFunctionResource, publicCatalogFunctionResource].every((resource) => /resourceGroupName\s*:\s*['"]data['"]/.test(resource))) {
+  failures.push('Data resolver Functions must share the data resource group to avoid nested-stack cycles')
 }
 
 

@@ -2,6 +2,34 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Beta job 8 assembly follow-up
+
+### Stage
+
+Corrective local release candidate after Beta job 8 failed during backend assembly. No backend resource, frontend artifact, DEPLOY step, or VERIFY step from job 8 was published; Production remains unchanged.
+
+### Observed
+
+- Amplify's hosted clean test run passed the admin route test but logged that Amplify had not been configured because the route attempted a Cognito session check in the no-outputs test environment.
+- Hosted synthesis and backend type checks passed, but Amplify detected a CloudFormation circular dependency between its generated data and Function nested stacks. Product-table grants made the resolver Functions depend on data while the data schema depended on those Functions.
+
+### Updated
+
+- Skip the Cognito session request when branch outputs are unavailable and render the existing disabled, explanatory sign-in state directly.
+- Added a focused test proving the unavailable adapter never calls Cognito.
+- Assigned the product manager, public catalog, and product-like resolver Functions to Amplify's `data` resource group so the mutually dependent resources synthesize into one nested stack.
+- Replaced the deprecated DynamoDB point-in-time-recovery property with the current recovery specification and extended the backend invariant check to require the data-stack placement.
+
+### Verification
+
+- The corrective full gate passed steering and backend-security invariants, warning-free Oxlint, all 28 tests, the production build, and backend TypeScript validation. The integrated audit could not reach npm from the workspace sandbox; the identical approved registry audit reported 0 production vulnerabilities.
+- Beta job 8 had already passed its hosted clean install, 27 tests, production build, production audit, backend synthesis, and backend type checks before the nested-stack cycle stopped assembly. DEPLOY and VERIFY were cancelled, and no cloud resource changed.
+- Hosted confirmation of the resource-group correction remains pending the next Beta job.
+
+### Next
+
+- Run the required full gate, publish the corrective commit to Beta, and verify that the next job completes BUILD, DEPLOY, and VERIFY before creating an administrator.
+
 ## 2026-08-07 — Secure administrator and managed-product foundation
 
 ### Stage

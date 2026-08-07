@@ -41,6 +41,21 @@ function catalog(products: AdminProduct[] = []): AdminProductGateway {
 }
 
 describe('AdminPage', () => {
+  it('does not call Cognito when Amplify outputs are unavailable', async () => {
+    const current = vi.fn()
+    const auth: AdminAuthGateway = {
+      isAvailable: false,
+      current,
+      signIn: vi.fn(),
+      confirm: vi.fn(),
+      signOut: vi.fn(),
+    }
+    render(<AdminPage auth={auth} catalog={catalog()} />)
+
+    expect(await screen.findByRole('heading', { name: 'Admin sign in' })).toBeInTheDocument()
+    expect(current).not.toHaveBeenCalled()
+  })
+
   it('completes the required TOTP challenge before showing the catalog', async () => {
     const auth: AdminAuthGateway = {
       isAvailable: true,
