@@ -2,6 +2,76 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Secure administrator and managed-product foundation
+
+### Stage
+
+Local backend release candidate. No Cognito user, cloud resource, commit, push, Amplify job, Beta deployment, or Production change was created in this update.
+
+### Updated
+
+- Added a private `/admin` workflow with administrator-created email sign-in, temporary-password continuation, authenticator setup, TOTP challenges, session checks, explicit non-admin denial, and sign-out.
+- Configured the Gen 2 Cognito pool with a server-issued `ADMINS` group, required TOTP MFA, email-only recovery, and self-registration disabled.
+- Added a GraphQL-backed Product model keyed by slug with draft, published, and archived lifecycle states. The model grants admins read access only; it exposes no direct model mutation authorization.
+- Added a least-privilege product-management Function for create, update, publish, archive, and conditional delete. The Function rechecks the `ADMINS` claim and validates slugs, bounded text, HTTPS images, ranks, ASINs, and Amazon retailer hosts before writing.
+- Added a read-only public catalog Function that projects only public fields and returns only `PUBLISHED` records. Public reads use a 365-day API key so browsing does not create a Cognito guest identity before consent, and affiliate ASINs/URLs remain absent from the public payload while links are disabled. Managed products load through a thin typed adapter and merge over the existing starter fixtures during migration.
+- Extended anonymous likes so a managed slug is accepted only when the Product table confirms that it is published. The four existing starter slugs retain their compatibility allowlist until fixture migration.
+- Added modular admin auth, data-client, sign-in, editor, manager, and page components plus responsive theme-aware styling. `/admin` is intentionally absent from public navigation.
+- Updated the Privacy Policy and Terms to describe private administrative authentication and managed catalog storage while keeping public registration and commercial retailer links disabled.
+- Added invariant, Function, route, MFA, and admin workflow tests. Logged fixture migration and immutable admin audit history as follow-up work.
+
+### Decisions
+
+- Authorize administrators using Cognito group claims at both AppSync and Function boundaries; never compare the submitted or displayed email address to an allowlist in the browser.
+- Use a bounded public API key only for sanitized read operations; preserve Cognito guest identity issuance for preference-consented like requests.
+- Require MFA for the current private user pool. Revisit pool topology before introducing public accounts so customer authentication policy can be designed independently.
+- Store Amazon-provided URLs but keep the public retailer button disabled until Associates enrollment, required disclosures, operator details, and legal review are complete.
+- Keep existing demo content visible while managed records are introduced, then migrate and remove the compatibility layer as a separate reversible change.
+- Reserve starter slugs until that migration so archiving a managed record cannot accidentally reveal a same-slug fixture. Suppress referrer information on product image requests and track first-party image storage plus CSP as pre-launch hardening.
+
+### Verification
+
+- `npm run check:full` passed steering and backend-security invariants, warning-free Oxlint, all 27 tests, the production build, and Amplify backend TypeScript validation. Its production-audit subprocess could not reach the npm registry inside the workspace sandbox; the identical audit was rerun with approved registry access and reported 0 vulnerabilities.
+- Focused tests cover all five product lifecycle actions, conditional writes, non-admin rejection, serialized group claims, URL validation, draft isolation, public projection and pagination, dynamic-like publication checks, MFA challenge handling, protected-route behavior, and the admin UI workflow.
+- Rendered desktop checks passed for the unconfigured `/admin` state in light and dark themes. The route remained absent from public navigation and sign-in remained disabled without branch outputs. The available browser surface could not emulate a mobile viewport; responsive rules and component behavior passed automated review, while hosted mobile acceptance remains required in Beta.
+- Data impact: the next Beta deployment will add one Product table, two Functions, a bounded public API key, Product-table grants for the likes Function, a Cognito `ADMINS` group, required TOTP MFA, and disabled self-registration. No existing Collection or product-like row is migrated or rewritten.
+- Rollback: revert this release before deployment, or promote a tested revert through Beta. If rollback occurs after Product records are created, export or deliberately retain those records before removing the model; do not delete the Product table ad hoc.
+
+### Next
+
+- Complete the full release gate and review the generated infrastructure diff and data impact.
+- After explicit approval, commit and push to `beta` only, verify the hosted backend, then create the intended administrator in Cognito and add that verified user to `ADMINS`.
+- Exercise first-login password replacement, TOTP enrollment, draft lifecycle operations, published-only public reads, and dynamic likes in Beta before considering any Production promotion.
+
+## 2026-08-07 — Administration, affiliate, and contact research
+
+### Stage
+
+Planning only. No application, authentication, data, email, affiliate-link, cloud-resource, commit, push, or deployment change was made.
+
+### Researched
+
+- Confirmed that Amazon SiteStripe can generate product Special Links with the Associate and tracking IDs already included, making manual product onboarding viable before API access.
+- Confirmed that an initial Associates application has 180 days to refer three qualifying sales for Amazon's review. Creators API registration requires a fully accepted account with qualifying sales, and the current introduction names at least 10 qualifying sales in the trailing 30 days.
+- Confirmed that Product Advertising API 5.0 was deprecated on May 15, 2026; any future integration must target Amazon's OAuth 2.0 Creators API instead.
+- Confirmed that Creators API can return detail-page URLs, titles/item information, Amazon-hosted image URLs, and OffersV2 price/availability data. Current guidance permits one-hour caching for offers and one-day caching for most other product resources.
+- Confirmed that Amazon requires a clear disclosure near affiliate links plus the site statement `As an Amazon Associate I earn from qualifying purchases.` once WantCove participates.
+- Confirmed that Amplify Gen 2 supports Google and Apple federation through Cognito, secret-managed provider credentials, callback/logout URLs, and server-enforced Cognito group authorization.
+- Confirmed that Amazon SES requires a verified sender identity; while the account is in the SES sandbox, recipients must also be verified and sending is capped at 200 messages per day and one message per second.
+
+### Recommendation
+
+- Build the admin route and group-enforced GraphQL product workflow before public social login. Use the existing Cognito email login with MFA for the first administrator, manually place the verified user in `ADMINS`, and never rely on the browser or an email string for authorization.
+- Make manual SiteStripe onboarding the first commercial slice. Store Amazon-provided URLs unchanged, use original/licensed imagery, support draft/publish/archive, and avoid manually asserted Amazon ratings or time-sensitive prices until Creators API access is available.
+- Add Google sign-in later as convenience for the administrator or when public cross-device likes/collections justify accounts. Defer Apple sign-in during the web-only phase.
+- Implement contact as a bounded guest GraphQL request to a Function that sends through SES from a verified WantCove identity to the fixed monitored address, with Reply-To set to the visitor, spam/rate controls, safe text handling, and explicit retention/privacy terms.
+
+### Next
+
+- Confirm the recommended first slice: admin authentication plus manual product create/edit/archive/publish.
+- Collect the Amazon Associates store/tracking ID and generated SiteStripe links only after enrollment; keep all commercial links disabled until disclosures and release blockers are complete.
+- Treat the contact form and Creators API as separate later backend changes with their own threat model, legal review, tests, and full release gates.
+
 ## 2026-08-07 — Hosted guest-like payload repair
 
 ### Stage
@@ -25,10 +95,14 @@ Local corrective release candidate after Amplify Beta job 6 deployed successfull
 - The focused Function test initially hit Vitest's known pre-import Windows worker-start timeout; an unchanged retry passed all 4 Function tests in 6.36 seconds.
 - The required full backend gate passed steering and security invariants, warning-free Oxlint, all 12 tests, the production build, and Amplify backend TypeScript validation.
 - The full-gate audit request was blocked by the workspace network sandbox; the identical production audit was rerun with registry access and reported 0 vulnerabilities.
+- Amplify Beta job 7 deployed commit `172b031` successfully through BUILD, DEPLOY, and VERIFY.
+- Hosted cloud reads completed without session fallback; a Like persisted after a full reload, and the subsequent Unlike deletion also persisted after a full reload.
+- The acceptance test removed its temporary DynamoDB row, and the Function emitted no CloudWatch `ERROR` events during the post-deploy test window.
 
 ### Next
 
-- Request explicit approval for a second corrective commit and Beta push, then repeat the reload-based hosted persistence and cleanup test before any Production promotion.
+- Commit the hosted verification record after explicit approval.
+- Keep Production unchanged until the full Beta release is reviewed and explicitly approved for promotion.
 
 ## 2026-08-06 — Beta like-handler compatibility repair
 

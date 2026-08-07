@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CatalogProvider } from '../features/catalog/CatalogProvider'
 import { LikesProvider } from '../features/likes/LikesProvider'
 import { PrivacyPreferencesProvider } from '../features/privacy/PrivacyPreferencesProvider'
 import { PrivacySettingsButton } from '../features/privacy/PrivacySettingsButton'
@@ -15,5 +16,5 @@ export default function App() {
   const path = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  return <PrivacyPreferencesProvider><ThemeProvider><LikesProvider><div className="site-shell"><SiteHeader menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} themeControl={<ThemeToggle />} /><MobileDrawer open={menuOpen} onClose={() => setMenuOpen(false)} /><main>{resolveRoute(path)}</main><SiteFooter privacyControl={<PrivacySettingsButton />} /><StorageNotice /></div></LikesProvider></ThemeProvider></PrivacyPreferencesProvider>
+  return <PrivacyPreferencesProvider><ThemeProvider><CatalogProvider><LikesProvider><div className="site-shell"><SiteHeader menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} themeControl={<ThemeToggle />} /><MobileDrawer open={menuOpen} onClose={() => setMenuOpen(false)} /><main>{resolveRoute(path)}</main><SiteFooter privacyControl={<PrivacySettingsButton />} /><StorageNotice /></div></LikesProvider></CatalogProvider></ThemeProvider></PrivacyPreferencesProvider>
 }

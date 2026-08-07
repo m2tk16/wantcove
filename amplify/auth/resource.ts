@@ -8,4 +8,10 @@ export const auth = defineAuth({
   loginWith: {
     email: true,
   },
+  groups: ['ADMINS'],
+  multifactor: {
+    mode: 'REQUIRED',
+    totp: true,
+  },
+  accountRecovery: 'EMAIL_ONLY',
 });

@@ -12,6 +12,7 @@ function event(argumentsValue: { productSlug: string; liked?: boolean }, eventId
 describe('product-likes Function', () => {
   beforeEach(() => {
     process.env.PRODUCT_LIKES_TABLE_NAME = 'ProductLikesTable';
+    process.env.PRODUCT_TABLE_NAME = 'ProductTable';
   });
 
   it('reads only the server-derived identity key and honors an unexpired like', async () => {
@@ -54,9 +55,23 @@ describe('product-likes Function', () => {
   });
 
   it('rejects unknown products and identities without a Cognito Identity ID', async () => {
-    const handler = createProductLikesHandler(vi.fn());
+    const send = vi.fn().mockResolvedValue({});
+    const handler = createProductLikesHandler(send);
 
     await expect(handler(event({ productSlug: 'unknown-product' }))).rejects.toThrow('Unknown product.');
     await expect(handler(event({ productSlug: 'levitating-globe-lamp' }, null))).rejects.toThrow('Unauthorized');
+  });
+
+  it('allows a dynamic slug only when the Product table marks it published', async () => {
+    const send = vi.fn()
+      .mockResolvedValueOnce({ Item: { status: 'PUBLISHED' } })
+      .mockResolvedValueOnce({ Item: { expiresAt: Math.floor(Date.now() / 1000) + 60 } });
+    const handler = createProductLikesHandler(send);
+
+    await expect(handler(event({ productSlug: 'smart-reading-light' }))).resolves.toBe(true);
+    expect(send.mock.calls[0][0].input).toMatchObject({
+      TableName: 'ProductTable',
+      Key: { slug: 'smart-reading-light' },
+    });
   });
 });

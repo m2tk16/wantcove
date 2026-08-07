@@ -20,6 +20,7 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByRole('heading', { name: /cool stuff/i })).toBeInTheDocument()
     expect(screen.getAllByRole('article')).toHaveLength(8)
     expect(screen.getByRole('link', { name: /explore the find/i })).toHaveAttribute('href', '/products/levitating-globe-lamp')
+    expect(screen.getAllByRole('img').every((image) => image.getAttribute('referrerpolicy') === 'no-referrer')).toBe(true)
   })
 
   it('renders a product detail route with disclosure', () => {
@@ -45,6 +46,13 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByRole('heading', { name: /wandered off/i })).toBeInTheDocument()
   })
 
+  it('keeps the admin route out of public navigation and closed without backend configuration', async () => {
+    renderAt('/admin')
+    expect(await screen.findByRole('heading', { name: 'Admin sign in' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign in securely' })).toBeDisabled()
+    expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/admin"]')).toBeNull()
+  })
+
   it('keeps Terms and Privacy available from the footer without primary navigation links', () => {
     const view = renderAt('/terms')
     expect(screen.getByRole('heading', { name: 'Terms of Service' })).toBeInTheDocument()
@@ -57,6 +65,8 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/link-click and referral information/i)).toBeInTheDocument()
     expect(screen.getByText(/approximately 180 days/i)).toBeInTheDocument()
     expect(screen.getByText(/does not send WantCove a raw IP address/i)).toBeInTheDocument()
+    expect(screen.getByText(/Public user registration is disabled/i)).toBeInTheDocument()
+    expect(screen.getByText(/time-based one-time-password multifactor authentication/i)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/privacy"]')).toBeNull()
   })
 

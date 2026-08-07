@@ -1,7 +1,12 @@
 import { readFile } from 'node:fs/promises'
 
 const dataResource = await readFile('amplify/data/resource.ts', 'utf8')
+const authResource = await readFile('amplify/auth/resource.ts', 'utf8')
 const backendResource = await readFile('amplify/backend.ts', 'utf8')
+const manageProductsFunctionResource = await readFile('amplify/functions/manage-products/resource.ts', 'utf8')
+const manageProductsHandler = await readFile('amplify/functions/manage-products/handler.ts', 'utf8')
+const publicCatalogFunctionResource = await readFile('amplify/functions/public-catalog/resource.ts', 'utf8')
+const publicCatalogHandler = await readFile('amplify/functions/public-catalog/handler.ts', 'utf8')
 const productLikesFunctionResource = await readFile('amplify/functions/product-likes/resource.ts', 'utf8')
 const productLikesHandler = await readFile('amplify/functions/product-likes/handler.ts', 'utf8')
 
@@ -20,6 +25,22 @@ const requirements = [
     pattern: /defaultAuthorizationMode\s*:\s*['"]userPool['"]/,
   },
   {
+    label: 'Product model access must be read-only for the ADMINS group',
+    pattern: /Product:\s*a[\s\S]*?\.authorization\(\s*\(allow\)\s*=>\s*\[allow\.group\(['"]ADMINS['"]\)\.to\(\[['"]read['"]\]\)\]\s*\)/,
+  },
+  {
+    label: 'Public catalog operations must use API-key-authorized Function handlers',
+    pattern: /listPublishedProducts[\s\S]*allow\.publicApiKey\(\)[\s\S]*a\.handler\.function\(publicCatalogFunction\)[\s\S]*getPublishedProduct[\s\S]*allow\.publicApiKey\(\)[\s\S]*a\.handler\.function\(publicCatalogFunction\)/,
+  },
+  {
+    label: 'Public catalog API key must have a bounded expiration',
+    pattern: /apiKeyAuthorizationMode\s*:\s*\{[\s\S]*expiresInDays\s*:\s*365/,
+  },
+  {
+    label: 'Product changes must use an ADMINS-only Function handler',
+    pattern: /manageProduct[\s\S]*allow\.group\(['"]ADMINS['"]\)[\s\S]*a\.handler\.function\(manageProductsFunction\)/,
+  },
+  {
     label: 'Anonymous like operations must use explicit guest authorization',
     pattern: /getViewerProductLike[\s\S]*allow\.guest\(\)[\s\S]*setViewerProductLike[\s\S]*allow\.guest\(\)/,
   },
@@ -34,12 +55,21 @@ const requirements = [
 ]
 
 const backendRequirements = [
+  ['Public self-registration must remain disabled', /allowAdminCreateUserOnly\s*:\s*true/],
+  ['The product manager must have table read/write access', /productTable\.grantReadWriteData\(manageProductsLambda\)/],
+  ['The public catalog must have table read-only access', /productTable\.grantReadData\(publicCatalogLambda\)/],
+  ['Product likes must have product-table read-only access', /productTable\.grantReadData\(productLikesLambda\)/],
   ['Product likes must partition by product slug', /partitionKey\s*:\s*\{\s*name\s*:\s*['"]productSlug['"]/],
   ['Product likes must sort by server-derived actor key', /sortKey\s*:\s*\{\s*name\s*:\s*['"]actorKey['"]/],
   ['Product likes must expire automatically', /timeToLiveAttribute\s*:\s*['"]expiresAt['"]/],
   ['Product likes must have point-in-time recovery', /pointInTimeRecovery\s*:\s*true/],
   ['Only the product-likes Function may access the table', /productLikesTable\.grantReadWriteData\(productLikesLambda\)/],
   ['The product-likes table name must be injected by the backend', /backend\.productLikesFunction\.addEnvironment\(['"]PRODUCT_LIKES_TABLE_NAME['"]\s*,\s*productLikesTable\.tableName\)/],
+]
+
+const authRequirements = [
+  ['The ADMINS Cognito group must exist', /groups\s*:\s*\[['"]ADMINS['"]\]/],
+  ['Administrator MFA must be required', /multifactor\s*:\s*\{[\s\S]*mode\s*:\s*['"]REQUIRED['"][\s\S]*totp\s*:\s*true/],
 ]
 
 const failures = requirements
@@ -50,6 +80,10 @@ for (const [label, pattern] of backendRequirements) {
   if (!pattern.test(backendResource)) failures.push(label)
 }
 
+for (const [label, pattern] of authRequirements) {
+  if (!pattern.test(authResource)) failures.push(label)
+}
+
 if (!/cognitoIdentityId/.test(productLikesHandler)) {
   failures.push('Product-like Function must derive its actor key from Cognito identity')
 }
@@ -58,12 +92,37 @@ if (/sourceIp|arguments\.actorKey/.test(productLikesHandler)) {
   failures.push('Product-like Function must not trust an IP address or client-supplied actor key')
 }
 
+if (!/PRODUCT_TABLE_NAME/.test(productLikesHandler) || !/status\s*!==\s*['"]PUBLISHED['"]/.test(productLikesHandler)) {
+  failures.push('Dynamic likes must verify that the product is published')
+}
+
+if (!/cognito:groups/.test(manageProductsHandler) || !/includes\(['"]ADMINS['"]\)/.test(manageProductsHandler)) {
+  failures.push('Product manager must recheck the ADMINS identity claim')
+}
+
+if (!/attribute_not_exists\(slug\)/.test(manageProductsHandler) || !/attribute_exists\(slug\)/.test(manageProductsHandler)) {
+  failures.push('Product writes must retain conditional create/update/delete guards')
+}
+
+if (!/item\.status\s*!==\s*['"]PUBLISHED['"]/.test(publicCatalogHandler) || !/ProjectionExpression/.test(publicCatalogHandler)) {
+  failures.push('Public catalog must filter drafts and project only public fields')
+}
+
+if (/item\.(amazonAsin|retailerUrl)/.test(publicCatalogHandler) || /PROJECTION\s*=.*(amazonAsin|retailerUrl)/.test(publicCatalogHandler)) {
+  failures.push('Disabled affiliate identifiers and URLs must not enter the public catalog payload')
+}
+
 if (!/PRODUCT_LIKE_TTL_SECONDS\s*=\s*60\s*\*\s*60\s*\*\s*24\s*\*\s*180/.test(productLikesHandler)) {
   failures.push('Anonymous like records must use the documented 180-day TTL')
 }
 
 if (!/timeoutSeconds\s*:\s*10/.test(productLikesFunctionResource)) {
   failures.push('Product-like Function must retain a bounded execution timeout')
+}
+
+
+if (!/timeoutSeconds\s*:\s*10/.test(manageProductsFunctionResource) || !/timeoutSeconds\s*:\s*10/.test(publicCatalogFunctionResource)) {
+  failures.push('Catalog Functions must retain bounded execution timeouts')
 }
 
 if (/a\.handler\.custom/.test(dataResource)) {

@@ -1,11 +1,16 @@
-export type ProductSlug = 'levitating-globe-lamp' | 'adjustable-dumbbell-set' | 'portable-pizza-oven' | 'wireless-earbuds'
+export type ProductSlug = string
 
 export type Product = {
   slug: ProductSlug
   name: string
-  price: string
+  price?: string
   category: string
   image: string
-  rating: string
+  imageAlt?: string
+  rating?: string
   description: string
+  amazonAsin?: string
+  retailerUrl?: string
+  featuredRank?: number
+  source?: 'fixture' | 'managed'
 }

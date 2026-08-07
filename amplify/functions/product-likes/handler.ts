@@ -8,7 +8,7 @@ import {
 import type { AppSyncIdentity, AppSyncResolverHandler } from 'aws-lambda';
 
 const PRODUCT_LIKE_TTL_SECONDS = 60 * 60 * 24 * 180;
-const productSlugs = new Set([
+const legacyProductSlugs = new Set([
   'levitating-globe-lamp',
   'adjustable-dumbbell-set',
   'portable-pizza-oven',
@@ -24,6 +24,12 @@ type ProductLikeArguments = {
 function requireTableName() {
   const tableName = process.env.PRODUCT_LIKES_TABLE_NAME;
   if (!tableName) throw new Error('Product likes table is not configured.');
+  return tableName;
+}
+
+function requireProductTableName() {
+  const tableName = process.env.PRODUCT_TABLE_NAME;
+  if (!tableName) throw new Error('Product storage is not configured.');
   return tableName;
 }
 
@@ -45,9 +51,21 @@ function requireActorKey(identity: AppSyncIdentity) {
 export function createProductLikesHandler(send: SendCommand) {
   return async (event: ProductLikeEvent): Promise<boolean> => {
     const { productSlug, liked } = event.arguments;
-    if (!productSlugs.has(productSlug)) throw new Error('Unknown product.');
-
     const actorKey = requireActorKey(event.identity);
+    if (!legacyProductSlugs.has(productSlug)) {
+      if (productSlug.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productSlug)) {
+        throw new Error('Unknown product.');
+      }
+      const product = await send(new GetCommand({
+        TableName: requireProductTableName(),
+        Key: { slug: productSlug },
+        ConsistentRead: true,
+        ProjectionExpression: '#status',
+        ExpressionAttributeNames: { '#status': 'status' },
+      }));
+      if (product.Item?.status !== 'PUBLISHED') throw new Error('Unknown product.');
+    }
+
     const TableName = requireTableName();
     const Key = { productSlug, actorKey };
 
