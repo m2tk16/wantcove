@@ -2,6 +2,35 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Collection ownership reassignment blocked
+
+### Stage
+
+Security hardening discovered during the first hosted Amplify Gen 2 update.
+
+### Observed
+
+- Amplify warned that the owner-authorized `Collection` model allowed an owner to reassign a record to another user by default.
+- AWS documents field-level owner authorization as the control that prevents this reassignment.
+
+### Updated
+
+- Added an explicit `owner` field that permits its owner to read or delete the field but not update it.
+- Preserved deny-by-default Cognito user-pool authorization and model-level owner-only CRUD access.
+- Added `verify:security` to the fast gate so owner scope, immutable ownership, and the user-pool default fail closed if removed.
+- Recorded the completed P1 security hardening in `.agents/FEATURE_BACKLOG.md`.
+
+### Verification
+
+- `npm run check:full` passed: steering and backend-security invariants, clean Oxlint, 5 tests, production build, backend TypeScript validation, and 0 production dependency vulnerabilities.
+- Data impact review: the existing implicit `owner` field becomes explicit with stricter resolver authorization; no table replacement or data-shape migration is expected.
+- Hosted verification remains pending the Beta and Production deployments for this hardening commit.
+
+### Next
+
+- Publish the same verified hardening commit to Beta and Production.
+- Confirm the Amplify synthesis warning is absent and smoke-test both hosted stages.
+
 ## 2026-08-06 — Initial Amplify deployments verified
 
 ### Stage

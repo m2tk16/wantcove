@@ -16,8 +16,9 @@
     "test": "vitest run --pool=threads --maxWorkers=1",
     "test:watch": "vitest",
     "verify:steering": "node scripts/verify-steering.mjs",
+    "verify:security": "node scripts/verify-backend-security.mjs",
     "check:backend": "tsc -p amplify/tsconfig.json --noEmit",
-    "check:fast": "npm run verify:steering && npm run lint && npm run test",
+    "check:fast": "npm run verify:steering && npm run verify:security && npm run lint && npm run test",
     "check:full": "npm run check:fast && npm run build && npm run check:backend && npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {

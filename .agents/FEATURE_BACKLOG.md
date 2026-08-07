@@ -9,7 +9,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 | P1 Security | Protected main branch and required CI checks | High / Low | Next | Configure in GitHub after the first push. |
 | P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; upstream toolchain currently reports 20 development-only advisories. Recheck before deployment. |
 | P1 Security | Cognito authentication UI and session handling | High / Medium | Planned | Connect only after a non-production sandbox exists. |
-| P1 Security | Owner-scoped collections and saved items | High / Medium | Started | Collection model is owner-only; item model awaits product decisions. |
+| P1 Security | Owner-scoped collections and saved items | High / Medium | Started | Collection model is owner-only with reassignment blocked; item model awaits product decisions. |
 | P2 Bugs | Visual and interaction QA against supplied mockups | High / Low | In progress | Initial responsive catalog pass built from two supplied mockups; browser QA remains. |
 | P1 Security | Affiliate disclosure and safe outbound-link policy | High / Low | Started | Baseline disclosure and inert button added; enrollment, URLs, and external-link security remain. |
 | P1 Security | Legal operator identity, contact, jurisdiction, and counsel review | High / Medium | Release blocker | Required before Beta accounts/commercial links and before Production. |
@@ -24,3 +24,5 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 ## Completed or rejected
 
 Move items here with a date, outcome, and log reference when implemented or rejected.
+
+- 2026-08-06 — P1 Security / High value, low effort: blocked `Collection.owner` reassignment with field-level authorization and added a fast-gate invariant check after Amplify surfaced the default behavior during deployment.

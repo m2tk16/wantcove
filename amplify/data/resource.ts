@@ -5,6 +5,9 @@ const schema = a.schema({
     .model({
       title: a.string().required(),
       description: a.string(),
+      owner: a
+        .string()
+        .authorization((allow) => [allow.owner().to(['read', 'delete'])]),
     })
     .authorization((allow) => [allow.owner()]),
 });
