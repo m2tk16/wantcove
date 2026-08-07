@@ -2,6 +2,36 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Initial Amplify deployment repair
+
+### Stage
+
+Amplify app `dzrkss4yfifm3` is connected; first Beta and Production jobs failed before resource deployment.
+
+### Observed
+
+- `beta` job 1 and `main` job 1 failed during the backend `npm ci` command.
+- The shared cause was an out-of-sync package lock under the clean Amplify build environment.
+- No backend, frontend, or verification deployment step ran after the failed install.
+
+### Updated
+
+- Regenerated `package-lock.json` using Node 22.22.0 and npm 10.9.4.
+- Added `.nvmrc`, package engine metadata, and explicit Node 22.22.0 selection in `amplify.yml`.
+- Reproduced Amplify’s exact `npm ci --cache .npm --prefer-offline` command locally; it completed successfully.
+
+### Verification
+
+- Amplify's exact `npm ci --cache .npm --prefer-offline` command passed from the regenerated lockfile.
+- `npm run check:full` passed: steering verification, clean Oxlint, 5 tests, production build, backend TypeScript validation, and 0 production dependency vulnerabilities.
+- Hosted verification remains pending the second Beta and Production deployment jobs.
+
+### Next
+
+- Publish the same repair commit to `beta` and `main`.
+- Monitor both second deployment jobs through BUILD, DEPLOY, and VERIFY.
+- Record hosted URLs and smoke-test results only after both jobs succeed.
+
 ## 2026-08-06 — Initial Git branches published
 
 ### Stage
