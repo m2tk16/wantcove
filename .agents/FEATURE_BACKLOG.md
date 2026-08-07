@@ -7,7 +7,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 | Priority | Feature | Value / effort | Status | Notes |
 | --- | --- | --- | --- | --- |
 | P1 Security | Protected main branch and required CI checks | High / Low | Next | Configure in GitHub after the first push. |
-| P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; upstream toolchain currently reports 20 development-only advisories. Recheck before deployment. |
+| P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; the current development toolchain reports 25 advisories (6 moderate, 19 high), primarily in the Amplify/CDK tree. |
 | P1 Security | Cognito authentication UI and session handling | High / Medium | Planned | Connect only after a non-production sandbox exists. |
 | P1 Security | Owner-scoped collections and saved items | High / Medium | Started | Collection model is owner-only with reassignment blocked; item model awaits product decisions. |
 | P2 Bugs | Visual and interaction QA against supplied mockups | High / Low | In progress | Initial responsive catalog pass built from two supplied mockups; browser QA remains. |

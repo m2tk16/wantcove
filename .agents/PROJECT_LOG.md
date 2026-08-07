@@ -2,6 +2,26 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Dependency advisory baseline refreshed
+
+### Stage
+
+Post-deployment security backlog reconciliation after regenerating the lockfile.
+
+### Updated
+
+- Corrected the tracked development-tool advisory baseline from 20 to 25 after the clean-install repair changed lockfile metadata.
+- Kept the item at P1 Security; the application runtime remains unaffected by the currently reported advisories.
+
+### Verification
+
+- Full `npm audit --json` reported 6 moderate and 19 high development-tree advisories, with no low or critical advisories.
+- The release gate's `npm audit --omit=dev --audit-level=high` reported 0 production dependency vulnerabilities.
+
+### Next
+
+- Review safe Amplify/CDK upgrades separately; do not use a forced breaking audit fix.
+
 ## 2026-08-06 — Collection ownership reassignment blocked
 
 ### Stage
