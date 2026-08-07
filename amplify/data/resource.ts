@@ -1,4 +1,5 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { productLikesFunction } from '../functions/product-likes/resource';
 
 const schema = a.schema({
   Collection: a
@@ -18,12 +19,7 @@ const schema = a.schema({
       allow.guest(),
       allow.authenticated('identityPool'),
     ])
-    .handler(
-      a.handler.custom({
-        dataSource: 'ProductLikesTableDataSource',
-        entry: './get-viewer-product-like.js',
-      }),
-    ),
+    .handler(a.handler.function(productLikesFunction)),
   setViewerProductLike: a
     .mutation()
     .arguments({
@@ -35,12 +31,7 @@ const schema = a.schema({
       allow.guest(),
       allow.authenticated('identityPool'),
     ])
-    .handler(
-      a.handler.custom({
-        dataSource: 'ProductLikesTableDataSource',
-        entry: './set-viewer-product-like.js',
-      }),
-    ),
+    .handler(a.handler.function(productLikesFunction)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

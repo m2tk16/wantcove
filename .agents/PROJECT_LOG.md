@@ -2,6 +2,46 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Beta like-handler compatibility repair
+
+### Stage
+
+Corrective local release candidate after Amplify Beta job 5 failed during backend assembly. No backend resource, frontend artifact, DEPLOY step, or VERIFY step from job 5 was published.
+
+### Observed
+
+- Amplify's hosted clean install, 8 tests, lint, production build, backend TypeScript check, and production audit all passed for commit `907fd57`.
+- Gen 2 backend synthesis and its type checks passed, but assembly validation rejected Identity Pool authorization on `a.handler.custom`; Amplify reports that `allow.guest()` and `allow.authenticated('identityPool')` are not currently supported with AppSync-JS custom handlers.
+- Job 5 ended in BUILD failure at that guardrail; DEPLOY and VERIFY were cancelled.
+
+### Updated
+
+- Replaced the unsupported AppSync-JS handlers with one Amplify Function while preserving the existing typed GraphQL query and mutation.
+- Kept the actor key server-derived from the AppSync Cognito Identity context; the browser still cannot submit an actor identity, and raw IP remains unused.
+- Granted only that Function read/write access to the isolated product-like table and injected the generated table name through Amplify's supported Function environment API.
+- Replaced `@aws-appsync/utils` with the current modular DynamoDB SDK packages required by the Function.
+- Added four focused Function tests for identity-scoped reads, bounded-TTL writes, unlike deletion, and unknown-product/missing-identity rejection. The suite now contains 12 tests.
+- Changed Vitest from thread workers to one serial fork after clean Windows installs twice exceeded the thread-worker startup deadline before the React test file loaded; the forked runner has no worker handshake deadline and still limits execution to one test file at a time.
+- Extended security invariants to require the supported Function handler, bounded timeout, least-privilege table grant, generated table-name injection, server-derived identity, and absence of an AppSync-JS handler on the guest operations.
+- Recorded the Identity Pool custom-handler compatibility rule in `.agents/ARCHITECTURE.md` to prevent recurrence.
+
+### Decisions
+
+- Accept a small Lambda invocation/cold-start cost for anonymous likes rather than switch to an API key, expose a broadly writable model, accept a client-supplied identity, or use raw IP addresses.
+- Keep the frontend GraphQL contract, consent behavior, table key design, point-in-time recovery, and approximately 180-day TTL unchanged.
+
+### Verification
+
+- Amplify's exact `npm ci --cache .npm --prefer-offline` completed from the repaired lockfile with 1,058 packages installed.
+- The forked runner passed all 12 tests immediately after that clean install; the cold run took 81.06 seconds without a worker startup failure.
+- `npm run check:full` passed from the clean tree: steering and backend-security invariants, warning-free Oxlint, 12 tests, production build, Amplify backend TypeScript validation, and 0 production dependency vulnerabilities.
+- Development-tool audit remains at 20 advisories (1 moderate, 19 high); no forced or breaking audit fix was applied.
+
+### Next
+
+- Request explicit approval for the corrective commit and Beta push.
+- Monitor the next Beta job through BUILD, DEPLOY, and VERIFY; then smoke-test guest like/unlike behavior before any Production promotion.
+
 ## 2026-08-06 — Consent-aware themes and anonymous product likes
 
 ### Stage

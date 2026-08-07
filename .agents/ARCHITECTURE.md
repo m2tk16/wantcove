@@ -32,5 +32,6 @@ WantCove is a professional feature-oriented React application. Keep composition 
 - React features call thin typed adapters in `src/services/`; they never access DynamoDB or infrastructure SDKs directly.
 - DynamoDB keys, ownership fields, actor identities, timestamps, and other security-sensitive values are derived or validated by backend resolvers rather than trusted from browser input.
 - Guest writes require a documented abuse model, explicit least-privilege authorization, bounded retention, and an invariant test. Do not use raw IP addresses as durable user identifiers.
+- Identity Pool-authorized custom GraphQL operations use an Amplify Function while Gen 2 rejects `allow.guest()` and `allow.authenticated('identityPool')` on AppSync-JS custom handlers. Grant that Function only the table permissions it needs and derive actor identity from the AppSync event.
 - The default Amplify Data authorization remains Cognito user-pool based. Any guest or identity-pool operation must opt in on the smallest possible GraphQL field.
 - Each hosted branch owns an isolated Gen 2 stack. Schema and resolver changes flow through Beta validation before Production promotion.

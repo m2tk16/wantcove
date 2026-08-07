@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
+import { productLikesFunction } from './functions/product-likes/resource';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -9,6 +10,7 @@ import { data } from './data/resource';
 const backend = defineBackend({
   auth,
   data,
+  productLikesFunction,
 });
 
 const productLikesStack = backend.createStack('ProductLikes');
@@ -20,4 +22,6 @@ const productLikesTable = new Table(productLikesStack, 'ProductLikesTable', {
   timeToLiveAttribute: 'expiresAt',
 });
 
-backend.data.addDynamoDbDataSource('ProductLikesTableDataSource', productLikesTable);
+const productLikesLambda = backend.productLikesFunction.resources.lambda;
+productLikesTable.grantReadWriteData(productLikesLambda);
+backend.productLikesFunction.addEnvironment('PRODUCT_LIKES_TABLE_NAME', productLikesTable.tableName);

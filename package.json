@@ -13,7 +13,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run --pool=threads --maxWorkers=1",
+    "test": "vitest run --pool=forks --maxWorkers=1 --no-file-parallelism",
     "test:watch": "vitest",
     "verify:steering": "node scripts/verify-steering.mjs",
     "verify:security": "node scripts/verify-backend-security.mjs",
@@ -22,6 +22,8 @@
     "check:full": "npm run check:fast && npm run build && npm run check:backend && npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1105.0",
+    "@aws-sdk/lib-dynamodb": "^3.1105.0",
     "aws-amplify": "^6.20.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -29,9 +31,9 @@
   "devDependencies": {
     "@aws-amplify/backend": "^1.24.0",
     "@aws-amplify/backend-cli": "^1.9.0",
-    "@aws-appsync/utils": "^2.1.1",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
+    "@types/aws-lambda": "^8.10.162",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
