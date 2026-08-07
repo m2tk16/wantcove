@@ -30,7 +30,6 @@ function requireTableName() {
 type ProductLikeEvent = {
   arguments: ProductLikeArguments;
   identity?: AppSyncIdentity;
-  info: { fieldName: string };
 };
 
 type CommandResult = { Item?: Record<string, unknown> };
@@ -52,7 +51,7 @@ export function createProductLikesHandler(send: SendCommand) {
     const TableName = requireTableName();
     const Key = { productSlug, actorKey };
 
-    if (event.info.fieldName === 'getViewerProductLike') {
+    if (liked === undefined) {
       const result = await send(new GetCommand({
         TableName,
         Key,
@@ -65,7 +64,7 @@ export function createProductLikesHandler(send: SendCommand) {
       );
     }
 
-    if (event.info.fieldName !== 'setViewerProductLike' || typeof liked !== 'boolean') {
+    if (typeof liked !== 'boolean') {
       throw new Error('Unsupported product-like operation.');
     }
 

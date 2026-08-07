@@ -2,6 +2,34 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Hosted guest-like payload repair
+
+### Stage
+
+Local corrective release candidate after Amplify Beta job 6 deployed successfully but the hosted acceptance test found that cloud likes fell back to session-only state. Production remains unchanged.
+
+### Observed
+
+- Amplify Beta job 6 for commit `e8965a9` succeeded through BUILD, DEPLOY, and VERIFY.
+- Hosted Home, Categories, New arrivals, Top picks, Deals, Terms, and Privacy routes rendered successfully; privacy-choice dismissal and the light/dark theme toggle also worked.
+- The first optimistic Like → Unlike UI cycle appeared successful, but a reload-oriented check exposed the session-only fallback.
+- CloudWatch reported `Cannot read properties of undefined (reading 'fieldName')` for the deployed product-likes Function. Amplify's generated direct Lambda resolver supplies the operation arguments and identity but does not supply the assumed `event.info` object.
+
+### Updated
+
+- Derived the operation from the schema-controlled argument shape: omitted `liked` performs the query read; a boolean `liked` performs the mutation write or delete.
+- Updated the Function tests to use the real deployed event shape without `event.info`, preventing the same false-positive contract assumption.
+
+### Verification
+
+- The focused Function test initially hit Vitest's known pre-import Windows worker-start timeout; an unchanged retry passed all 4 Function tests in 6.36 seconds.
+- The required full backend gate passed steering and security invariants, warning-free Oxlint, all 12 tests, the production build, and Amplify backend TypeScript validation.
+- The full-gate audit request was blocked by the workspace network sandbox; the identical production audit was rerun with registry access and reported 0 vulnerabilities.
+
+### Next
+
+- Request explicit approval for a second corrective commit and Beta push, then repeat the reload-based hosted persistence and cleanup test before any Production promotion.
+
 ## 2026-08-06 — Beta like-handler compatibility repair
 
 ### Stage
