@@ -19,17 +19,20 @@ Security hardening discovered during the first hosted Amplify Gen 2 update.
 - Preserved deny-by-default Cognito user-pool authorization and model-level owner-only CRUD access.
 - Added `verify:security` to the fast gate so owner scope, immutable ownership, and the user-pool default fail closed if removed.
 - Recorded the completed P1 security hardening in `.agents/FEATURE_BACKLOG.md`.
+- Logged Amplify build-runtime setup optimization as a future high-value, low-effort item after observing repeated default global-tool installation.
 
 ### Verification
 
 - `npm run check:full` passed: steering and backend-security invariants, clean Oxlint, 5 tests, production build, backend TypeScript validation, and 0 production dependency vulnerabilities.
 - Data impact review: the existing implicit `owner` field becomes explicit with stricter resolver authorization; no table replacement or data-shape migration is expected.
-- Hosted verification remains pending the Beta and Production deployments for this hardening commit.
+- Amplify `beta` job 4 and `main` job 4 passed BUILD, DEPLOY, and VERIFY for commit `43086df`.
+- Both hosted synthesis logs completed without the ownership-reassignment warning.
+- Home, product, Terms, and Privacy routes returned HTTP 200 on both stages after the resolver update.
 
 ### Next
 
-- Publish the same verified hardening commit to Beta and Production.
-- Confirm the Amplify synthesis warning is absent and smoke-test both hosted stages.
+- Configure required GitHub checks and branch protection for `beta` and `main`.
+- Optimize the Amplify build bootstrap before deployment frequency increases.
 
 ## 2026-08-06 — Initial Amplify deployments verified
 

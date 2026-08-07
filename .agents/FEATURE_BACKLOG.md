@@ -14,8 +14,9 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 | P1 Security | Affiliate disclosure and safe outbound-link policy | High / Low | Started | Baseline disclosure and inert button added; enrollment, URLs, and external-link security remain. |
 | P1 Security | Legal operator identity, contact, jurisdiction, and counsel review | High / Medium | Release blocker | Required before Beta accounts/commercial links and before Production. |
 | P3 High/Low | Modular feature architecture | High / Low | Completed | Thin app shell, shared modules, typed catalog feature, and legal feature added. |
-| P1 Security | Isolated beta and production Amplify resources | High / Medium | Planned | One Amplify app, two protected deployed branches, no shared data or secrets. |
+| P1 Security | Isolated beta and production Amplify resources | High / Medium | Completed | Separate branch stacks, auth resources, data resources, and generated outputs were verified during deployment. |
 | P3 High/Low | Optimize generated catalog images | High / Low | Proposed | Convert large source PNGs to responsive WebP/AVIF before beta. |
+| P3 High/Low | Optimize Amplify build runtime setup | High / Low | Proposed | The pinned Node install reinstalls Amplify image default global tools on every build; reduce setup time without weakening the runtime pin. |
 | P3 High/Low | Create, rename, and archive collections | High / Low | Proposed | First useful signed-in workflow. |
 | P3 High/Low | Save a link with title and note | High / Low | Proposed | Keep metadata fetching out of the first slice. |
 | P5 High/High | Shared collections | High / High | Deferred | Requires explicit sharing and authorization design. |
