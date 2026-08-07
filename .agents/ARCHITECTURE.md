@@ -25,3 +25,12 @@ WantCove is a professional feature-oriented React application. Keep composition 
 ## Dependency direction
 
 `app` may compose `features` and `shared`. Features may use `shared` and typed service interfaces. Shared modules must not import feature modules. Service adapters must not import React components.
+
+## Data boundaries
+
+- GraphQL through Amplify Data is the default boundary for persisted product and user-facing domain data. Static fixtures are acceptable only for isolated prototypes and tests.
+- React features call thin typed adapters in `src/services/`; they never access DynamoDB or infrastructure SDKs directly.
+- DynamoDB keys, ownership fields, actor identities, timestamps, and other security-sensitive values are derived or validated by backend resolvers rather than trusted from browser input.
+- Guest writes require a documented abuse model, explicit least-privilege authorization, bounded retention, and an invariant test. Do not use raw IP addresses as durable user identifiers.
+- The default Amplify Data authorization remains Cognito user-pool based. Any guest or identity-pool operation must opt in on the smallest possible GraphQL field.
+- Each hosted branch owns an isolated Gen 2 stack. Schema and resolver changes flow through Beta validation before Production promotion.

@@ -2,6 +2,43 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-06 — Consent-aware themes and anonymous product likes
+
+### Stage
+
+Local Beta release candidate. No commit, push, cloud resource change, or deployment was made in this update.
+
+### Updated
+
+- Added accessible light and dark themes using semantic surface and text tokens; checked normal-text color pairs at 5.22:1 or higher and primary text above 17:1.
+- Added a fixed side privacy panel with Allow preferences and Essential only choices, plus a persistent footer control for reopening the panel.
+- Kept theme and like changes session-only when preferences are declined or Amplify outputs are unavailable; no advertising cookie was introduced.
+- Added thin, typed GraphQL like operations and a shared React like-state feature so repeated product cards stay synchronized.
+- Added a dedicated DynamoDB product-like table with product-slug partition keys, server-derived Cognito Identity IDs as sort keys, pay-per-request billing, point-in-time recovery, and approximately 180-day TTL records.
+- Preserved Cognito user-pool authorization as the Data API default and limited guest/identity-pool access to the two scalar like operations.
+- Added resolver and infrastructure invariant checks that reject client-supplied identity, raw-IP identity, unknown product slugs, and missing Cognito guest identities.
+- Updated the Terms and Privacy Policy for anonymous likes, AWS processing, browser storage choices, retention, and manipulation safeguards.
+- Added GraphQL-first data-boundary steering and logged future catalog migration plus anonymous-like abuse monitoring/rate limiting.
+- Added `@aws-appsync/utils` for typed AppSync JavaScript resolver helpers; the refreshed development-tool audit decreased from 25 to 20 advisories (1 moderate, 19 high), while the production audit remains clean.
+
+### Verification
+
+- `npm run check:full` passed: steering and security invariants, warning-free Oxlint, 8 focused tests, production build, Amplify backend TypeScript validation, and 0 production dependency vulnerabilities.
+- Post-gate clean-install validation found and repaired four bundled OpenTelemetry lock entries removed by npm's initial metadata refresh. Windows initially blocked replacement of Vite's loaded native binding while the local preview remained open; after the verified preview process was stopped, `npm ci --cache .npm --prefer-offline` completed successfully with 1,051 packages restored. Correction: the transient incomplete `node_modules` state is resolved; commit and push remain blocked only until the final full gate passes and the user explicitly approves publication.
+- The first gate immediately after the clean install hit a one-time Vitest worker startup timeout before any test loaded; an isolated rerun passed all 8 tests, and the subsequent fully captured `npm run check:full` passed in 20.8 seconds. The runner-startup condition is resolved and did not require a code or test-policy exception.
+- Automated coverage verifies privacy-choice behavior, session-only decline behavior, accessible theme switching, duplicate-card like synchronization, legal routes, catalog routes, and mobile navigation.
+- Rendered desktop and 390-pixel mobile checks passed in light and dark themes with no browser warnings or errors.
+- Rendered QA found and fixed a desktop product-image collapse caused by percentage height sizing; the full-size product image was rechecked after the fix.
+- Data impact review: this adds a new isolated table and GraphQL fields; it does not migrate or rewrite existing Collection data. Branch deployment will create a separate table in each branch stack.
+- Rollback: revert the source change before deployment, or promote a later revert through Beta; the new table is isolated from existing owner-scoped Collection records.
+
+### Next
+
+- Review this release candidate, then commit and push to `beta` only with explicit approval.
+- Verify Beta stack synthesis, guest identity issuance, like/unlike persistence, TTL configuration, and Privacy/Terms routes before considering a Production promotion.
+- Add monitoring and rate limiting before showing aggregate like counts or broadly promoting anonymous writes.
+- Keep Production commercialization and account launch blocked on operator identity, monitored contact, jurisdiction review, and qualified legal review.
+
 ## 2026-08-06 — Dependency advisory baseline refreshed
 
 ### Stage

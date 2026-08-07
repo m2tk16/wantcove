@@ -9,7 +9,11 @@ function renderAt(path: string) {
 }
 
 describe('WantCove discovery routes', () => {
-  beforeEach(() => window.history.replaceState({}, '', '/'))
+  beforeEach(() => {
+    window.history.replaceState({}, '', '/')
+    window.localStorage.clear()
+    delete document.documentElement.dataset.theme
+  })
 
   it('renders the curated product home page', () => {
     renderAt('/')
@@ -51,6 +55,38 @@ describe('WantCove discovery routes', () => {
     renderAt('/privacy')
     expect(screen.getByRole('heading', { name: 'Privacy Policy' })).toBeInTheDocument()
     expect(screen.getByText(/link-click and referral information/i)).toBeInTheDocument()
+    expect(screen.getByText(/approximately 180 days/i)).toBeInTheDocument()
+    expect(screen.getByText(/does not send WantCove a raw IP address/i)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/privacy"]')).toBeNull()
+  })
+
+  it('offers explicit storage choices and keeps essential-only preferences session based', () => {
+    renderAt('/')
+
+    expect(screen.getByRole('dialog', { name: /your privacy choices/i })).toHaveTextContent(/do not use advertising cookies or your IP address/i)
+    fireEvent.click(screen.getByRole('button', { name: /essential only/i }))
+
+    expect(screen.queryByRole('dialog', { name: /your privacy choices/i })).not.toBeInTheDocument()
+    expect(window.localStorage.getItem('wantcove-privacy-choice')).toBe('essential')
+    expect(window.localStorage.getItem('wantcove-theme')).toBeNull()
+  })
+
+  it('switches between accessible high-contrast theme states', () => {
+    renderAt('/')
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light')
+
+    fireEvent.click(screen.getByRole('button', { name: /use dark theme/i }))
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
+    expect(screen.getByRole('button', { name: /use light theme/i })).toBeInTheDocument()
+  })
+
+  it('keeps anonymous likes synchronized across repeated product cards in the session', () => {
+    renderAt('/')
+    fireEvent.click(screen.getByRole('button', { name: /essential only/i }))
+
+    const likeButtons = screen.getAllByRole('button', { name: /like levitating globe lamp/i })
+    fireEvent.click(likeButtons[0])
+
+    expect(screen.getAllByRole('button', { name: /unlike levitating globe lamp/i })).toHaveLength(likeButtons.length)
   })
 })
