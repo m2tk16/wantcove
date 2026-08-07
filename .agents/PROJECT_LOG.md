@@ -2,6 +2,35 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Branch-policy CI guardrail
+
+### Stage
+
+Local security guardrail candidate. No GitHub setting, commit, push, deployment, cloud resource, or Production resource was changed.
+
+### Updated
+
+- Run CI for pull requests and pushes targeting both `beta` and `main`.
+- Use one stable `Branch policy check` that runs the fast gate for Beta and the full release gate for Production, allowing the same named check to be required on both protected branches.
+- Keep workflow repository permissions read-only, cancel superseded runs, and pin the official checkout and setup-node Actions to the immutable commits currently referenced by their official v4 tags.
+- Added a local CI-policy verifier and regression tests that reject removal of the Production full gate, elevated contents permission, `pull_request_target`, or missing immutable pins.
+
+### Security and release review
+
+- The workflow does not receive write permission or secrets and does not use `pull_request_target`, reducing untrusted pull-request risk.
+- GitHub branch protection remains an external configuration step: both branches must require pull requests and the `Branch policy check`, restrict direct pushes and force pushes, and prevent deletion before the backlog item can be completed.
+- This change affects repository automation only. It does not change runtime data, authentication, cookies, affiliate behavior, or Terms/Privacy content.
+
+### Verification
+
+- The focused CI-policy verifier and all 3 policy regression tests pass. `npm run check:fast` passes steering, backend-security and CI-policy invariants, warning-free lint, and all 34 tests.
+- The initial focused verifier run exposed an unbounded multiline permission regex that could hang on valid YAML. Replacing it with a bounded single-line permission match resolved the verifier defect before the full gate.
+
+### Next
+
+- Review the workflow diff and request approval before commit or push.
+- After explicit approval, push the existing acceptance record and this guardrail to Beta, verify CI and Amplify, then configure and confirm GitHub protection for `beta` and `main`.
+
 ## 2026-08-07 — Managed catalog Beta acceptance completed
 
 ### Stage

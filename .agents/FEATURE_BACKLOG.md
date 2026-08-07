@@ -6,7 +6,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 | Priority | Feature | Value / effort | Status | Notes |
 | --- | --- | --- | --- | --- |
-| P1 Security | Protected main branch and required CI checks | High / Low | Next | Configure in GitHub after the first push. |
+| P1 Security | Protected main branch and required CI checks | High / Low | In progress | Local CI policy now assigns the fast gate to Beta and the full gate to Production with read-only permissions and immutable action pins. GitHub rules must still require `Branch policy check`, pull requests, and restricted direct pushes on both branches. |
 | P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; the current development toolchain reports 20 advisories (1 moderate, 19 high), primarily in the Amplify/CDK tree. Do not apply npm's suggested major-version downgrades. |
 | P1 Security | Anonymous-like abuse monitoring and rate limits | High / Medium | Planned | Cognito guest identity prevents duplicate rows per browser identity, but clearing browser storage can create a new identity. Add metrics and throttling before public promotion or aggregate counts. |
 | P1 Security | Public catalog API-key expiry monitoring | High / Low | Proposed | The read-only catalog key expires within 365 days. Add an operational reminder or alert well before expiry and verify branch deployments refresh it without exposing any write field. |
@@ -39,6 +39,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 Move items here with a date, outcome, and log reference when implemented or rejected.
 
+- 2026-08-07 — P1 Security / High value, low effort: pinned the official checkout and setup-node Actions to immutable commits, limited workflow permissions to read-only, and added cancellation for superseded CI runs.
 - 2026-08-07 — P2 Bug / High value, low effort: added strict AWSJSON decoding for the public managed catalog after hosted acceptance proved AppSync returns the custom payload as a JSON string; Beta deployment and complete catalog lifecycle acceptance passed.
 - 2026-08-06 — P1 Security / High value, low effort: blocked `Collection.owner` reassignment with field-level authorization and added a fast-gate invariant check after Amplify surfaced the default behavior during deployment.
 - 2026-08-06 — P1 Security / High value, low effort: added explicit preference controls and a footer-accessible privacy panel; declined preferences remain session-only and no advertising cookie is introduced.
