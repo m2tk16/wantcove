@@ -2,6 +2,28 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — GitHub Actions enabled and Beta job 13 verified
+
+### Stage
+
+The owner enabled GitHub Actions for the repository after the Actions page revealed that workflow execution was still globally disabled. The existing Beta push was not replayed, branch protection remains pending, and Production remains unchanged.
+
+### Verified
+
+- GitHub recorded commit `30cf111` on `beta`, but created no workflow run because the repository-level Actions feature was disabled at the time of the push. The owner enabled the feature from the repository Actions page after preserving the previously configured source restrictions, immutable-SHA requirement, read-only workflow token, and pull-request controls.
+- Amplify Beta job 13 completed BUILD, DEPLOY, and VERIFY successfully for `30cf111`. The hosted build completed backend synthesis and type checks, CloudFormation reached `UPDATE_COMPLETE`, the production frontend build passed, and the deployment and verification phases succeeded.
+- A new Beta event is required to prove the GitHub `Branch policy check`. This documentation-only checkpoint supplies that auditable event after explicit push approval.
+
+### Security and legal review
+
+- Enabling Actions activates only the reviewed read-only workflow. It does not grant repository write access, expose secrets, alter runtime authentication or data, enable affiliate links, or change cookie behavior.
+- No Terms or Privacy trigger applies. Production remains blocked by the existing operator-identity, contact, jurisdiction, and qualified-review requirements.
+
+### Next
+
+- Run the fast gate, commit this checkpoint locally, and request explicit approval before pushing it to Beta.
+- Verify the GitHub `Branch policy check` and Amplify deployment, then configure protected rules for `beta` and `main`.
+
 ## 2026-08-07 — GitHub Actions repository guardrails configured
 
 ### Stage
