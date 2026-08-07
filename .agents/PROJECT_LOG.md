@@ -2,6 +2,30 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Secure administration deployed to Beta
+
+### Stage
+
+Beta deployment and operator bootstrap completed for commit `4bd33e9`. Production remains unchanged, and public affiliate destinations remain disabled.
+
+### Deployed
+
+- Amplify Beta job 9 completed BUILD, DEPLOY, and VERIFY successfully after the three data resolver Functions were colocated with the data stack.
+- The Beta backend now includes the Product table and resolvers, protected product-management Function, sanitized public-catalog Functions, dynamic-like publication checks, the Cognito `ADMINS` group, required TOTP MFA, and administrator-only account creation.
+- Created the intended administrator through Cognito's invitation flow without generating or exposing a password locally, then verified that the enabled user is in `ADMINS` and awaiting first-login password replacement.
+
+### Verification
+
+- The hosted build ran a clean install, all 28 tests, the production frontend build, the production dependency audit with 0 vulnerabilities, backend synthesis, and backend type checks before deployment.
+- CloudFormation reached `UPDATE_COMPLETE`; the previous data/Function nested-stack circular dependency did not recur.
+- Amplify reported BUILD, DEPLOY, and VERIFY as successful. Hosted direct requests to `/`, `/admin`, `/privacy`, and `/products/levitating-globe-lamp` returned HTTP 200 with the application shell.
+- Browser smoke testing confirmed the public catalog renders managed-read fallback content and disclosures, while `/admin` renders the configured restricted MFA sign-in. The deployed user pool has self-signup disabled, required MFA, software-token TOTP enabled, no SMS MFA, and a live `ADMINS` group.
+
+### Next
+
+- The administrator must use the emailed invitation to choose a permanent password and enroll an authenticator app.
+- After first sign-in, exercise create, edit, draft isolation, publish, archive, guarded delete, public catalog projection, and managed-product likes in Beta before any Production promotion.
+
 ## 2026-08-07 — Beta job 8 assembly follow-up
 
 ### Stage
