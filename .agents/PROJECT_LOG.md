@@ -2,6 +2,34 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Protected release-branch ruleset activated
+
+### Stage
+
+Repository ruleset `20574550` (`Protected release branches`) is active for `beta` and `main`. This completion record is being prepared on `codex/record-branch-protection` so it must use the newly enforced pull-request workflow. Production code and AWS resources remain unchanged.
+
+### Enforced
+
+- Both release branches reject deletion and non-fast-forward updates, require every change to arrive through a pull request, require review conversations to be resolved, and require the strict `Branch policy check` before merging.
+- The bypass list is empty. Required approving reviews remain at zero while the repository has one maintainer, preventing self-review deadlock while preserving the pull-request trail and CI gate.
+- GitHub Actions remains limited to GitHub-authored or owner-authored actions, requires immutable action SHAs, uses a read-only workflow token, and cannot create or approve pull requests.
+
+### Verification
+
+- GitHub CI run `31227942694` completed successfully for Beta commit `1470897`; its required job was reported as `Branch policy check`.
+- Amplify Beta job 14 completed BUILD, DEPLOY, and VERIFY successfully for the same commit. Production remained untouched.
+- GitHub's effective-rules endpoints report the same four active rules for both branches. The required check is currently recorded without an expected-source integration binding; track binding it specifically to GitHub Actions if the repository UI exposes that option.
+
+### Security and legal review
+
+- The ruleset applies to human and automated pushes equally and prevents direct release-branch updates, but it supplements rather than replaces code review, tests, least-privilege cloud authorization, and release judgment.
+- This repository-governance change does not alter runtime authentication, personal-data handling, cookies, affiliate behavior, or outbound links. No Terms or Privacy update is triggered, and the existing Production legal blockers remain in effect.
+
+### Next
+
+- Commit this record on the feature branch, request explicit approval before pushing it, open a pull request into `beta`, and confirm the required check blocks merging until it succeeds.
+- After the protected-flow acceptance passes, resume the highest-priority product backlog work without weakening the ruleset.
+
 ## 2026-08-07 — GitHub Actions enabled and Beta job 13 verified
 
 ### Stage
