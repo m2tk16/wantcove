@@ -8,7 +8,7 @@ import type { AppSyncResolverHandler } from 'aws-lambda';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PROJECTION = 'slug, #name, description, category, imageUrl, imageAlt, featuredRank, publishedAt';
+const PROJECTION = 'slug, #name, description, category, imageUrl, imageAlt, priceLabel, ratingLabel, featuredRank, publishedAt';
 
 type PublicCatalogArguments = { slug?: string };
 type PublicCatalogEvent = { arguments: PublicCatalogArguments };
@@ -34,6 +34,8 @@ function publicProduct(item: Record<string, unknown> | undefined) {
     category: item.category,
     imageUrl: item.imageUrl,
     imageAlt: item.imageAlt,
+    priceLabel: item.priceLabel,
+    ratingLabel: item.ratingLabel,
     featuredRank: item.featuredRank,
     publishedAt: item.publishedAt,
   };

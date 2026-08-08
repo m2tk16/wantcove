@@ -1,4 +1,10 @@
-import { DeleteCommand, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  BatchGetCommand,
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  TransactWriteCommand,
+} from '@aws-sdk/lib-dynamodb';
 import type { AppSyncIdentity } from 'aws-lambda';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createManageProductsHandler, type StoredProduct } from './handler';
@@ -24,8 +30,12 @@ const productInput = {
   featuredRank: 4,
 };
 
-function event(argumentsValue: Record<string, unknown>, identity: AppSyncIdentity = adminIdentity) {
-  return { arguments: argumentsValue, identity } as never;
+function event(
+  argumentsValue: Record<string, unknown>,
+  identity: AppSyncIdentity = adminIdentity,
+  fieldName = 'manageProduct',
+) {
+  return { arguments: argumentsValue, identity, info: { fieldName } } as never;
 }
 
 describe('manage-products Function', () => {
@@ -48,6 +58,29 @@ describe('manage-products Function', () => {
     });
   });
 
+  it('accepts only allowlisted first-party image paths and bounded display labels', async () => {
+    const send = vi.fn().mockResolvedValue({});
+    const handler = createManageProductsHandler(send);
+
+    const result = await handler(event({
+      ...productInput,
+      imageUrl: '/products/reading-light.webp',
+      priceLabel: '$49.99',
+      ratingLabel: '4.8',
+    }));
+    expect(result).toMatchObject({
+      imageUrl: '/products/reading-light.webp',
+      priceLabel: '$49.99',
+      ratingLabel: '4.8',
+    });
+
+    await expect(handler(event({
+      ...productInput,
+      slug: 'unsafe-image-path',
+      imageUrl: '/uploads/reading-light.svg',
+    }))).rejects.toThrow(/safe \/products\//);
+  });
+
   it('rejects non-admin identities and unsafe retailer URLs before writing', async () => {
     const send = vi.fn();
     const handler = createManageProductsHandler(send);
@@ -58,10 +91,106 @@ describe('manage-products Function', () => {
   });
 
   it('reserves starter slugs so an archived managed record cannot reveal its fixture fallback', async () => {
-    const send = vi.fn();
+    const existingStarter = {
+      slug: 'levitating-globe-lamp',
+      status: 'PUBLISHED',
+      name: 'Existing starter',
+      createdAt: '2026-08-01T00:00:00.000Z',
+      updatedAt: '2026-08-01T00:00:00.000Z',
+      __typename: 'Product',
+    };
+    const send = vi.fn().mockResolvedValue({ Item: existingStarter });
     const handler = createManageProductsHandler(send);
 
     await expect(handler(event({ ...productInput, slug: 'levitating-globe-lamp' }))).rejects.toThrow(/reserved/);
+    await expect(handler(event({ action: 'ARCHIVE', slug: 'levitating-globe-lamp' }))).rejects.toThrow(/fixture fallback/);
+    await expect(handler(event({ action: 'DELETE', slug: 'levitating-globe-lamp' }))).rejects.toThrow(/fixture fallback/);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls.every(([command]) => command instanceof GetCommand)).toBe(true);
+  });
+
+  it('migrates all missing starters as published records without affiliate destinations', async () => {
+    const send = vi.fn().mockResolvedValueOnce({ Responses: { ProductTable: [] } }).mockResolvedValueOnce({});
+    const handler = createManageProductsHandler(send);
+
+    const result = await handler(event({}, adminIdentity, 'migrateStarterProducts'));
+    expect(result).toEqual({
+      migrated: [
+        'levitating-globe-lamp',
+        'adjustable-dumbbell-set',
+        'portable-pizza-oven',
+        'wireless-earbuds',
+      ],
+      existing: [],
+    });
+    expect(send.mock.calls[0][0]).toBeInstanceOf(BatchGetCommand);
+    const transaction = send.mock.calls[1][0];
+    expect(transaction).toBeInstanceOf(TransactWriteCommand);
+    expect(transaction.input.TransactItems).toHaveLength(4);
+    for (const item of transaction.input.TransactItems) {
+      expect(item.Put).toMatchObject({
+        TableName: 'ProductTable',
+        ConditionExpression: 'attribute_not_exists(slug)',
+        Item: { status: 'PUBLISHED', __typename: 'Product' },
+      });
+      expect(item.Put.Item).not.toHaveProperty('amazonAsin');
+      expect(item.Put.Item).not.toHaveProperty('retailerUrl');
+    }
+  });
+
+  it('does not overwrite starter records that already exist', async () => {
+    const send = vi.fn().mockResolvedValue({
+      Responses: {
+        ProductTable: [
+          { slug: 'levitating-globe-lamp' },
+          { slug: 'adjustable-dumbbell-set' },
+          { slug: 'portable-pizza-oven' },
+          { slug: 'wireless-earbuds' },
+        ],
+      },
+    });
+    const handler = createManageProductsHandler(send);
+
+    const result = await handler(event({}, adminIdentity, 'migrateStarterProducts'));
+    expect(result).toMatchObject({ migrated: [], existing: expect.arrayContaining([
+      'levitating-globe-lamp',
+      'adjustable-dumbbell-set',
+      'portable-pizza-oven',
+      'wireless-earbuds',
+    ]) });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('rechecks unprocessed starter keys and transacts only records proven missing', async () => {
+    const send = vi.fn()
+      .mockResolvedValueOnce({
+        Responses: { ProductTable: [{ slug: 'levitating-globe-lamp' }] },
+        UnprocessedKeys: { ProductTable: { Keys: [{ slug: 'adjustable-dumbbell-set' }] } },
+      })
+      .mockResolvedValueOnce({
+        Responses: { ProductTable: [{ slug: 'adjustable-dumbbell-set' }] },
+      })
+      .mockResolvedValueOnce({});
+    const handler = createManageProductsHandler(send);
+
+    const result = await handler(event({}, adminIdentity, 'migrateStarterProducts'));
+    expect(result).toEqual({
+      migrated: ['portable-pizza-oven', 'wireless-earbuds'],
+      existing: ['levitating-globe-lamp', 'adjustable-dumbbell-set'],
+    });
+    const transaction = send.mock.calls[2][0];
+    expect(transaction).toBeInstanceOf(TransactWriteCommand);
+    expect(transaction.input.TransactItems.map((item: { Put: { Item: { slug: string } } }) => item.Put.Item.slug)).toEqual([
+      'portable-pizza-oven',
+      'wireless-earbuds',
+    ]);
+  });
+
+  it('rejects a non-admin starter migration before reading storage', async () => {
+    const send = vi.fn();
+    const handler = createManageProductsHandler(send);
+
+    await expect(handler(event({}, viewerIdentity, 'migrateStarterProducts'))).rejects.toThrow('Unauthorized');
     expect(send).not.toHaveBeenCalled();
   });
 

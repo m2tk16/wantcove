@@ -1,21 +1,20 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
+  BatchGetCommand,
   DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { AppSyncIdentity, AppSyncResolverHandler } from 'aws-lambda';
+import { STARTER_PRODUCTS } from './starter-products';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ASIN_PATTERN = /^[A-Z0-9]{10}$/;
-const RESERVED_STARTER_SLUGS = new Set([
-  'levitating-globe-lamp',
-  'adjustable-dumbbell-set',
-  'portable-pizza-oven',
-  'wireless-earbuds',
-]);
+const FIRST_PARTY_PRODUCT_IMAGE_PATTERN = /^\/products\/[a-z0-9]+(?:[.-][a-z0-9]+)*\.(?:avif|jpe?g|png|webp)$/;
+const RESERVED_STARTER_SLUGS = new Set(STARTER_PRODUCTS.map(({ slug }) => slug));
 
 type ProductAction = 'CREATE' | 'UPDATE' | 'PUBLISH' | 'ARCHIVE' | 'DELETE';
 type ProductStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
@@ -28,6 +27,8 @@ type ManageProductArguments = {
   category?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
+  priceLabel?: string | null;
+  ratingLabel?: string | null;
   amazonAsin?: string | null;
   retailerUrl?: string | null;
   featuredRank?: number | null;
@@ -36,6 +37,7 @@ type ManageProductArguments = {
 type ManageProductEvent = {
   arguments: ManageProductArguments;
   identity?: AppSyncIdentity;
+  info?: { fieldName?: string };
 };
 
 export type StoredProduct = {
@@ -45,6 +47,8 @@ export type StoredProduct = {
   category: string;
   imageUrl: string;
   imageAlt: string;
+  priceLabel?: string;
+  ratingLabel?: string;
   amazonAsin?: string;
   retailerUrl?: string;
   status: ProductStatus;
@@ -55,7 +59,11 @@ export type StoredProduct = {
   __typename: 'Product';
 };
 
-type CommandResult = { Item?: Record<string, unknown> };
+type CommandResult = {
+  Item?: Record<string, unknown>;
+  Responses?: Record<string, Record<string, unknown>[]>;
+  UnprocessedKeys?: Record<string, { Keys?: Record<string, unknown>[] }>;
+};
 type SendCommand = (command: object) => Promise<CommandResult>;
 
 function requireTableName() {
@@ -106,6 +114,22 @@ function requireHttpsUrl(value: string | null | undefined, label: string) {
   return url;
 }
 
+function requireImageLocation(value: string | null | undefined) {
+  const raw = requireString(value, 'Image location', 1, 2_048);
+  if (raw.startsWith('/')) {
+    if (!FIRST_PARTY_PRODUCT_IMAGE_PATTERN.test(raw)) {
+      throw new Error('Image location must use a safe /products/ image path.');
+    }
+    return raw;
+  }
+  return requireHttpsUrl(raw, 'Image location').toString();
+}
+
+function optionalDisplayLabel(value: string | null | undefined, label: string, max: number) {
+  if (!value?.trim()) return undefined;
+  return requireString(value, label, 1, max);
+}
+
 function optionalAmazonUrl(value: string | null | undefined) {
   if (!value?.trim()) return undefined;
   const url = requireHttpsUrl(value, 'Retailer URL');
@@ -148,13 +172,17 @@ function productFromInput(
   const amazonAsin = optionalAsin(input.amazonAsin);
   const retailerUrl = optionalAmazonUrl(input.retailerUrl);
   const featuredRank = optionalRank(input.featuredRank);
+  const priceLabel = optionalDisplayLabel(input.priceLabel, 'Display price', 32);
+  const ratingLabel = optionalDisplayLabel(input.ratingLabel, 'Display rating', 16);
   return {
     slug: requireSlug(input.slug),
     name: requireString(input.name, 'Name', 2, 120),
     description: requireString(input.description, 'Description', 20, 1_600),
     category: requireString(input.category, 'Category', 2, 60),
-    imageUrl: requireHttpsUrl(input.imageUrl, 'Image URL').toString(),
+    imageUrl: requireImageLocation(input.imageUrl),
     imageAlt: requireString(input.imageAlt, 'Image alt text', 5, 200),
+    ...(priceLabel ? { priceLabel } : {}),
+    ...(ratingLabel ? { ratingLabel } : {}),
     ...(amazonAsin ? { amazonAsin } : {}),
     ...(retailerUrl ? { retailerUrl } : {}),
     status,
@@ -166,6 +194,55 @@ function productFromInput(
   };
 }
 
+async function migrateStarterProducts(send: SendCommand, TableName: string, now: string) {
+  const existingSlugs = new Set<string>();
+  let pendingKeys: Record<string, unknown>[] = STARTER_PRODUCTS.map(({ slug }) => ({ slug }));
+  let attempts = 0;
+
+  while (pendingKeys.length > 0) {
+    if (attempts >= 3) throw new Error('Product storage is busy. Retry the starter migration.');
+    const result = await send(new BatchGetCommand({
+      RequestItems: {
+        [TableName]: {
+          Keys: pendingKeys,
+          ProjectionExpression: 'slug',
+          ConsistentRead: true,
+        },
+      },
+    }));
+    for (const item of result.Responses?.[TableName] ?? []) {
+      if (typeof item.slug === 'string') existingSlugs.add(item.slug);
+    }
+    pendingKeys = result.UnprocessedKeys?.[TableName]?.Keys ?? [];
+    attempts += 1;
+  }
+  const missingProducts = STARTER_PRODUCTS.filter(({ slug }) => !existingSlugs.has(slug));
+
+  if (missingProducts.length > 0) {
+    await send(new TransactWriteCommand({
+      TransactItems: missingProducts.map((product) => ({
+        Put: {
+          TableName,
+          Item: {
+            ...product,
+            status: 'PUBLISHED',
+            publishedAt: now,
+            createdAt: now,
+            updatedAt: now,
+            __typename: 'Product',
+          },
+          ConditionExpression: 'attribute_not_exists(slug)',
+        },
+      })),
+    }));
+  }
+
+  return {
+    migrated: missingProducts.map(({ slug }) => slug),
+    existing: STARTER_PRODUCTS.filter(({ slug }) => existingSlugs.has(slug)).map(({ slug }) => slug),
+  };
+}
+
 function isStoredProduct(value: Record<string, unknown> | undefined): value is StoredProduct {
   return Boolean(value && typeof value.slug === 'string' && typeof value.status === 'string');
 }
@@ -173,13 +250,18 @@ function isStoredProduct(value: Record<string, unknown> | undefined): value is S
 export function createManageProductsHandler(send: SendCommand) {
   return async (event: ManageProductEvent): Promise<Record<string, unknown>> => {
     requireAdmin(event.identity);
+    const TableName = requireTableName();
+    const now = new Date().toISOString();
+
+    if (event.info?.fieldName === 'migrateStarterProducts') {
+      return migrateStarterProducts(send, TableName, now);
+    }
+
     const input = event.arguments;
     const slug = requireSlug(input.slug);
     if (!['CREATE', 'UPDATE', 'PUBLISH', 'ARCHIVE', 'DELETE'].includes(input.action)) {
       throw new Error('Unsupported product action.');
     }
-    const TableName = requireTableName();
-    const now = new Date().toISOString();
 
     if (input.action === 'CREATE') {
       if (RESERVED_STARTER_SLUGS.has(slug)) {
@@ -197,6 +279,10 @@ export function createManageProductsHandler(send: SendCommand) {
     const result = await send(new GetCommand({ TableName, Key: { slug }, ConsistentRead: true }));
     if (!isStoredProduct(result.Item)) throw new Error('Product not found.');
     const existing = result.Item;
+
+    if (RESERVED_STARTER_SLUGS.has(slug) && (input.action === 'ARCHIVE' || input.action === 'DELETE')) {
+      throw new Error('Starter products cannot be archived or deleted while fixture fallback is active.');
+    }
 
     if (input.action === 'DELETE') {
       await send(new DeleteCommand({

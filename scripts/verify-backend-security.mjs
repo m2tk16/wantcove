@@ -5,6 +5,7 @@ const authResource = await readFile('amplify/auth/resource.ts', 'utf8')
 const backendResource = await readFile('amplify/backend.ts', 'utf8')
 const manageProductsFunctionResource = await readFile('amplify/functions/manage-products/resource.ts', 'utf8')
 const manageProductsHandler = await readFile('amplify/functions/manage-products/handler.ts', 'utf8')
+const starterProducts = await readFile('amplify/functions/manage-products/starter-products.ts', 'utf8')
 const publicCatalogFunctionResource = await readFile('amplify/functions/public-catalog/resource.ts', 'utf8')
 const publicCatalogHandler = await readFile('amplify/functions/public-catalog/handler.ts', 'utf8')
 const productLikesFunctionResource = await readFile('amplify/functions/product-likes/resource.ts', 'utf8')
@@ -39,6 +40,10 @@ const requirements = [
   {
     label: 'Product changes must use an ADMINS-only Function handler',
     pattern: /manageProduct[\s\S]*allow\.group\(['"]ADMINS['"]\)[\s\S]*a\.handler\.function\(manageProductsFunction\)/,
+  },
+  {
+    label: 'Starter migration must use an ADMINS-only Function handler',
+    pattern: /migrateStarterProducts[\s\S]*allow\.group\(['"]ADMINS['"]\)[\s\S]*a\.handler\.function\(manageProductsFunction\)/,
   },
   {
     label: 'Anonymous like operations must use explicit guest authorization',
@@ -102,6 +107,22 @@ if (!/cognito:groups/.test(manageProductsHandler) || !/includes\(['"]ADMINS['"]\
 
 if (!/attribute_not_exists\(slug\)/.test(manageProductsHandler) || !/attribute_exists\(slug\)/.test(manageProductsHandler)) {
   failures.push('Product writes must retain conditional create/update/delete guards')
+}
+
+if (!/migrateStarterProducts/.test(manageProductsHandler) || !/BatchGetCommand/.test(manageProductsHandler) || !/TransactWriteCommand/.test(manageProductsHandler)) {
+  failures.push('Starter migration must read existing records and create missing records transactionally')
+}
+
+if (!/RESERVED_STARTER_SLUGS\.has\(slug\)[\s\S]*input\.action === ['"]ARCHIVE['"][\s\S]*input\.action === ['"]DELETE['"]/.test(manageProductsHandler)) {
+  failures.push('Starter records must resist archive/delete while fixture fallback is active')
+}
+
+if (!/FIRST_PARTY_PRODUCT_IMAGE_PATTERN/.test(manageProductsHandler) || !/\/products\//.test(manageProductsHandler)) {
+  failures.push('First-party product images must remain constrained to the /products/ path')
+}
+
+if (/amazonAsin|retailerUrl/.test(starterProducts)) {
+  failures.push('Starter migration records must not activate affiliate identifiers or destinations')
 }
 
 if (!/item\.status\s*!==\s*['"]PUBLISHED['"]/.test(publicCatalogHandler) || !/ProjectionExpression/.test(publicCatalogHandler)) {

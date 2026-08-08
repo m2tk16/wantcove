@@ -2,6 +2,40 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Guarded starter-catalog migration candidate
+
+### Stage
+
+Local first-phase backend and data release candidate on `codex/graphql-catalog-migration`. No commit, push, deployment, cloud mutation, Beta data row, or Production resource was created by this update.
+
+### Updated
+
+- Added an `ADMINS`-only GraphQL migration that consistently reads the four reserved starter slugs and transactionally creates only records proven missing. Every write retains `attribute_not_exists(slug)`, repeated runs leave existing records untouched, and unprocessed DynamoDB reads are retried before any write decision.
+- Starter records are created as published with server timestamps, existing display text, first-party `/products/` image paths, display-only price/rating labels, and no ASIN or retailer URL. The public projection exposes the display labels but continues to exclude affiliate identifiers and destinations.
+- Moved the four starter images to stable Vite `public/products/` paths and constrained managed first-party images to conservative raster filenames under that directory; external image locations must still be credential-free HTTPS URLs without custom ports.
+- Added an administrator migration control with missing-record count and a non-overwrite explanation. While fixture fallback remains active, both the Function and UI protect migrated starters from archive/delete so removed managed rows cannot silently reveal fallback fixtures.
+
+### Data, rollback, and compatibility
+
+- A hosted administrator must deliberately invoke the migration after Beta deployment; deployment alone creates no Product rows. One successful invocation can add at most the four documented records.
+- The code-fixture merge and legacy starter-like allowlist remain in place for this phase, preventing an empty storefront during rollout. They will be removed only in a separate release after Beta proves all four managed records and public parity.
+- If Beta acceptance fails, keep or restore the fixture-compatible code and do not run the migration again. The conditional migration never overwrites operator-edited records; any later data cleanup requires an explicit reviewed operation after fallback behavior is accounted for.
+
+### Security and legal review
+
+- Server-side `ADMINS` claim verification, draft/public separation, Amazon-host validation, inert affiliate actions, and the sanitized public catalog remain intact. The migration seed contains no commercial link or tracking identifier.
+- This phase changes storage location and preserves already visible demonstration labels; it adds no account, cookie, personal data, outbound destination, purchase flow, or new product claim. No Terms or Privacy text update is triggered. Real retailer pricing, ratings, and Special Links remain blocked by the affiliate/legal launch gates, and Production remains blocked by operator identity, monitored contact, jurisdiction, and qualified review.
+
+### Verification
+
+- The full local gate passed steering, backend-security and CI-policy invariants, warning-free lint, all 41 tests, the production frontend build, and backend TypeScript validation.
+- The integrated audit step could not reach npm from the workspace sandbox; the identical approved registry audit completed immediately afterward and reported 0 production vulnerabilities.
+
+### Next
+
+- Review the final diff, commit locally, and request explicit owner approval before pushing the protected feature branch.
+- Open a pull request into Beta, confirm the strict branch check and Amplify deployment, invoke the migration once as the administrator, and verify four managed/public products before preparing the compatibility-removal release.
+
 ## 2026-08-07 — Protected release-branch ruleset activated
 
 ### Stage
