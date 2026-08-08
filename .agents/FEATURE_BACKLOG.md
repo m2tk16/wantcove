@@ -6,7 +6,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 | Priority | Feature | Value / effort | Status | Notes |
 | --- | --- | --- | --- | --- |
-| P1 Security | Automated Production-readiness CI gate | High / Low | Local candidate | A machine-readable profile and `main`-only CI gate fail closed while legal identity, monitored contact, jurisdiction review, or qualified legal review is incomplete. Beta work remains available. |
+| P1 Security | Automated Production-readiness CI gate | High / Low | Beta accepted | PR #11 and Amplify Beta job 25 passed. The machine-readable profile and `main`-only CI gate fail closed while legal identity, monitored contact, jurisdiction review, or qualified legal review is incomplete; Beta work remains available. |
 | P1 Security | Bind required CI check to GitHub Actions source | Medium / Low | Proposed | Ruleset `20574550` requires `Branch policy check`, but the effective rule has no expected-source integration binding. Select GitHub Actions as the source if GitHub exposes it so another write-capable integration cannot satisfy a same-named status. |
 | P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; the current development toolchain reports 20 advisories (1 moderate, 19 high), primarily in the Amplify/CDK tree. Do not apply npm's suggested major-version downgrades. |
 | P1 Security | Anonymous-like abuse monitoring and rate limits | High / Medium | Planned | Cognito guest identity prevents duplicate rows per browser identity, but clearing browser storage can create a new identity. Add metrics and throttling before public promotion or aggregate counts. |

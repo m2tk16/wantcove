@@ -2,6 +2,28 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Production-readiness gate Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for merge commit `d67e2cf` from PR #11. Amplify Beta job 25 completed BUILD, DEPLOY, and VERIFY successfully. This completion record is local on `codex/record-production-readiness-gate-acceptance`; no documentation commit, push, `main` change, Production deployment, or Production resource has been made.
+
+### Hosted acceptance
+
+- The deployed Terms and Privacy routes display `WantCove` and Tennessee, United States while clearly retaining legal identity, jurisdiction-specific requirements, a verified monitored contact, and qualified review as Production blockers.
+- Neither legal route displays the planned `wantcove@gmail.com` address. It remains unavailable or unconfirmed, unverified, and unmonitored rather than being represented publicly as an active contact channel.
+- The hosted home route loaded all four GraphQL-backed catalog products, and the existing MFA-protected `ADMINS` session loaded the four managed products without a mutation.
+- Browser inspection across Terms, Privacy, home, and administrator routes reported no warning or error.
+
+### Security, legal, rollback, and next
+
+- The machine-readable release profile still truthfully blocks Production on legal-identity review, contact verification, contact monitoring, jurisdiction review, and qualified legal review. Commercial retailer links remain disabled.
+- The acceptance flow changed no authentication setting, Product record, like record, GraphQL or DynamoDB data, cookie policy, affiliate destination, secret, or cloud authorization. It performed only read-only hosted checks.
+- Production Amplify remains on its earlier successful job 4 at commit `43086df`; the Beta merge did not start a Production job.
+- Beta rollback remains redeployment of the previously accepted job 24 commit `dcc8953`. Removing or bypassing the readiness gate is not an acceptable substitute for completing the recorded blockers.
+- The local acceptance-documentation fast gate passed steering, backend-security and CI invariants, warning-free lint, and all 54 tests.
+- Before any Production promotion, create and verify the public contact mailbox, confirm it is actively monitored, complete the operator and Tennessee/United States review with qualified counsel, and update the readiness record from evidence rather than assumption.
+
 ## 2026-08-07 — Production-readiness fail-closed gate candidate
 
 ### Stage
