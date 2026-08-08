@@ -10,6 +10,7 @@ const publicCatalogFunctionResource = await readFile('amplify/functions/public-c
 const publicCatalogHandler = await readFile('amplify/functions/public-catalog/handler.ts', 'utf8')
 const productLikesFunctionResource = await readFile('amplify/functions/product-likes/resource.ts', 'utf8')
 const productLikesHandler = await readFile('amplify/functions/product-likes/handler.ts', 'utf8')
+const adminProductLikesPolicy = await readFile('amplify/policies/admin-product-likes.ts', 'utf8')
 const catalogProvider = await readFile('src/features/catalog/CatalogProvider.tsx', 'utf8')
 
 const requirements = [
@@ -62,6 +63,7 @@ const requirements = [
 
 const backendRequirements = [
   ['Public self-registration must remain disabled', /allowAdminCreateUserOnly\s*:\s*true/],
+  ['The field-scoped like policy must attach only to the ADMINS preferred role', /attachAdminProductLikesPolicy\([\s\S]*backend\.auth\.resources\.groups\[['"]ADMINS['"]\]\.role/],
   ['The product manager must have table read/write access', /productTable\.grantReadWriteData\(manageProductsLambda\)/],
   ['The public catalog must have table read-only access', /productTable\.grantReadData\(publicCatalogLambda\)/],
   ['Product likes must have product-table read-only access', /productTable\.grantReadData\(productLikesLambda\)/],
@@ -161,6 +163,19 @@ if (!/timeoutSeconds\s*:\s*10/.test(manageProductsFunctionResource) || !/timeout
 
 if (/a\.handler\.custom/.test(dataResource)) {
   failures.push('Identity-pool like operations must not use unsupported custom AppSync handlers')
+}
+
+if (!/new Policy\(scope,\s*['"]AdminProductLikesPolicy['"][\s\S]*actions\s*:\s*\[['"]appsync:GraphQL['"]\][\s\S]*\/types\/Query\/fields\/getViewerProductLike[\s\S]*\/types\/Mutation\/fields\/setViewerProductLike/.test(adminProductLikesPolicy)) {
+  failures.push('The ADMINS preferred IAM role must receive the two field-scoped AppSync like grants')
+}
+
+if (/types\/(?!Query\/fields\/getViewerProductLike|Mutation\/fields\/setViewerProductLike)/.test(adminProductLikesPolicy)) {
+  failures.push('The ADMINS preferred IAM role must not receive unrelated AppSync field access')
+}
+
+const adminPolicyActions = adminProductLikesPolicy.match(/actions\s*:\s*\[([^\]]*)\]/)?.[1].replace(/\s/g, '') ?? ''
+if (!/^['"]appsync:GraphQL['"]$/.test(adminPolicyActions) || /resources\s*:\s*\[[^\]]*['"]\*['"]/.test(adminProductLikesPolicy)) {
+  failures.push('The ADMINS product-like policy must not use wildcard resources or unrelated actions')
 }
 
 if (failures.length > 0) {
