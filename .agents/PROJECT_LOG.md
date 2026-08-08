@@ -2,6 +2,37 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Starter-migration dispatch correction
+
+### Stage
+
+Local corrective backend candidate on `codex/fix-starter-migration-dispatch`, branched from Beta merge commit `c77ff71`. No corrective commit, push, deployment, Product row, or Production change has been created.
+
+### Observed
+
+- PR #2 merged successfully and Amplify Beta job 16 completed BUILD, DEPLOY, and VERIFY for `c77ff71`; hosted `/`, `/admin`, and all four first-party image assets returned HTTP 200.
+- The authenticated administrator saw the expected pre-migration count of four, but the first migration attempt returned `Cannot read properties of undefined (reading 'trim')` and still showed zero managed products.
+- The generated Beta AppSync request mapping was inspected read-only. It places the server-controlled operation name in top-level `fieldName`; the shared Function checked `event.info.fieldName`, fell through to normal product slug validation, and stopped before any DynamoDB read or write.
+
+### Corrected
+
+- Dispatch the shared catalog Function from Amplify’s actual top-level `fieldName`, retaining the standard `info.fieldName` fallback for compatibility.
+- Harden slug validation so malformed runtime input returns the bounded domain validation message instead of a raw JavaScript type error.
+- Updated Function and security-invariant tests to use and require the deployed Amplify payload shape.
+
+### Security, data, and legal review
+
+- The operation name remains server-controlled by the generated resolver; no client argument can select the migration path. Existing `ADMINS` authorization, server-side group verification, consistent reads, conditional transaction, non-overwrite behavior, and affiliate exclusions remain unchanged.
+- The failed hosted attempt created no Product rows because dispatch failed before the first storage command. No cleanup or rollback is required.
+- This correction changes internal resolver routing only. It adds no personal data, cookie, account, outbound link, commercial claim, or affiliate behavior, so no Terms or Privacy update is triggered. Production remains blocked and untouched.
+
+### Verification and next
+
+- The focused manage-products suite passes all 13 tests using the deployed top-level payload shape. The full local gate passes steering, backend-security and CI-policy invariants, warning-free lint, all 42 tests, the production frontend build, and backend TypeScript validation.
+- The integrated audit step could not reach npm from the workspace sandbox; the identical approved registry audit completed immediately afterward and reported 0 production vulnerabilities.
+- Review and commit the correction locally, then request explicit approval before pushing the protected corrective branch.
+- After protected Beta deployment, retry the one-time migration and verify four protected published records plus public catalog parity before removing compatibility fallback.
+
 ## 2026-08-07 — Guarded starter-catalog migration candidate
 
 ### Stage
