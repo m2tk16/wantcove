@@ -6,6 +6,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 | Priority | Feature | Value / effort | Status | Notes |
 | --- | --- | --- | --- | --- |
+| P1 Security | Automated Production-readiness CI gate | High / Low | Local candidate | A machine-readable profile and `main`-only CI gate fail closed while legal identity, monitored contact, jurisdiction review, or qualified legal review is incomplete. Beta work remains available. |
 | P1 Security | Bind required CI check to GitHub Actions source | Medium / Low | Proposed | Ruleset `20574550` requires `Branch policy check`, but the effective rule has no expected-source integration binding. Select GitHub Actions as the source if GitHub exposes it so another write-capable integration cannot satisfy a same-named status. |
 | P1 Security | Resolve Amplify/CDK development-tool advisories | High / Medium | Tracking | Runtime audit is clean; the current development toolchain reports 20 advisories (1 moderate, 19 high), primarily in the Amplify/CDK tree. Do not apply npm's suggested major-version downgrades. |
 | P1 Security | Anonymous-like abuse monitoring and rate limits | High / Medium | Planned | Cognito guest identity prevents duplicate rows per browser identity, but clearing browser storage can create a new identity. Add metrics and throttling before public promotion or aggregate counts. |
@@ -18,7 +19,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 | P1 Security | Owner-scoped collections and saved items | High / Medium | Started | Collection model is owner-only with reassignment blocked; item model awaits product decisions. |
 | P2 Bugs | Visual and interaction QA against supplied mockups | High / Low | In progress | Hosted Beta desktop smoke passed for the catalog and restricted admin route; mobile viewport and authenticated lifecycle QA remain. |
 | P1 Security | Affiliate disclosure and safe outbound-link policy | High / Low | In progress | Associate ID `wantcove-20`, pending-review status, and the exact site identification statement are deployed to Beta. Before live links, use verified Amazon Special Links, retain near-link disclosure, and remove manually asserted ratings/prices unless supplied under current Program Content rules. |
-| P1 Security | Legal operator identity, contact, jurisdiction, and counsel review | High / Medium | Release blocker | Required before Beta accounts/commercial links and before Production. |
+| P1 Security | Legal operator identity, contact, jurisdiction, and counsel review | High / Medium | Release blocker | Public name `WantCove` and Tennessee, United States are recorded but not legally reviewed. Planned `wantcove@gmail.com` is not created, verified, or monitored; qualified review has not started. Production and commercial links remain blocked. |
 | P3 High/Low | Modular feature architecture | High / Low | Completed | Thin app shell, shared modules, typed catalog feature, and legal feature added. |
 | P1 Security | Isolated beta and production Amplify resources | High / Medium | Completed | Separate branch stacks, auth resources, data resources, and generated outputs were verified during deployment. |
 | P3 High/Low | Optimize generated catalog images | High / Low | Proposed | Convert large source PNGs to responsive WebP/AVIF before beta. |

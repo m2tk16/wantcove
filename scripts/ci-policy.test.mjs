@@ -14,6 +14,19 @@ describe('CI branch policy', () => {
     expect(validateCiPolicy(weakened)).toContain('CI is missing Production full gate.')
   })
 
+  it('rejects removal of the Production readiness gate', () => {
+    const weakened = workflow.replace('run: npm run verify:release', 'run: npm run check:fast')
+    expect(validateCiPolicy(weakened)).toContain('CI is missing Production readiness gate.')
+  })
+
+  it('rejects moving the Production readiness gate off main', () => {
+    const weakened = workflow.replace(
+      "if: github.base_ref == 'main' || github.ref == 'refs/heads/main'\n        run: npm run verify:release",
+      "if: github.base_ref == 'beta' || github.ref == 'refs/heads/beta'\n        run: npm run verify:release",
+    )
+    expect(validateCiPolicy(weakened)).toContain('CI is missing Production readiness gate.')
+  })
+
   it('rejects elevated or pull-request-target workflows', () => {
     const weakened = workflow
       .replace('contents: read', 'contents: write')

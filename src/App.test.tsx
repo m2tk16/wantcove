@@ -120,6 +120,9 @@ describe('WantCove discovery routes', () => {
     expect(screen.getAllByText('As an Amazon Associate I earn from qualifying purchases.')).toHaveLength(2)
     expect(screen.getByText(/affiliate or referral code/i)).toBeInTheDocument()
     expect(screen.getByText(/Password recovery does not remove MFA/i)).toBeInTheDocument()
+    expect(screen.getByText(/being developed from Tennessee, United States/i)).toBeInTheDocument()
+    expect(screen.getByText(/WantCove is the recorded public operator name/i)).toBeInTheDocument()
+    expect(screen.queryByText(/wantcove@gmail\.com/i)).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Legal' })).toBeInTheDocument()
     view.unmount()
 
@@ -131,6 +134,9 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/Public user registration is disabled/i)).toBeInTheDocument()
     expect(screen.getByText(/time-based one-time-password multifactor authentication/i)).toBeInTheDocument()
     expect(screen.getByText(/short-lived recovery codes and replacement passwords/i)).toBeInTheDocument()
+    expect(screen.getByText(/being developed from Tennessee, United States/i)).toBeInTheDocument()
+    expect(screen.getByText(/No planned but unavailable or unmonitored address/i)).toBeInTheDocument()
+    expect(screen.queryByText(/wantcove@gmail\.com/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/privacy"]')).toBeNull()
   })
 

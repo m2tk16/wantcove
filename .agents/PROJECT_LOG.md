@@ -2,6 +2,29 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Production-readiness fail-closed gate candidate
+
+### Stage
+
+Local release-guardrail candidate on `codex/production-readiness-gate`, based on accepted Beta commit `dcc8953`. No commit, push, pull request, Beta deployment, `main` change, Production deployment, or cloud-resource change has been made.
+
+### Recorded facts and implementation
+
+- Recorded the owner-provided public name `WantCove` and location Tennessee, United States without treating either as a reviewed legal-identity or jurisdiction determination.
+- Recorded `wantcove@gmail.com` only as a planned contact. The mailbox has not been created or confirmed available, so it remains unverified, unmonitored, and absent from the public Terms and Privacy pages.
+- Recorded qualified legal review as not started and kept commercial affiliate links disabled.
+- Added `.agents/PRODUCTION_READINESS.json` as a machine-readable readiness record plus `npm run verify:release`, which reports every unresolved blocker and exits unsuccessfully until the record contains verified completion facts.
+- Added a `main`-only GitHub Actions readiness step before the existing Production full gate. Beta pull requests retain the fast gate and are not blocked by unfinished Production legal work.
+- Updated the pre-release Terms and Privacy text to identify WantCove and Tennessee accurately while stating that legal identity, jurisdiction-specific requirements, a verified monitored contact, and qualified review remain incomplete.
+
+### Security, legal, testing, and rollback
+
+- The gate fails closed and is covered by policy tests so a Production pull request cannot silently omit it. Affiliate links also cannot be marked enabled while launch approval is false.
+- This record is operational change control, not legal advice. No placeholder, planned email, or owner assumption is accepted as completed review evidence.
+- The change adds no authentication, personal-data processing, GraphQL operation, database record, cookie, affiliate destination, secret, or cloud resource. Production remains on its earlier known-good deployment.
+- Rollback is a reviewed removal of the readiness profile, validator, CI step, and associated policy wording. A rollback must not be used to bypass incomplete Production requirements.
+- Focused policy and legal coverage passed, and final verification passed steering, backend-security and CI invariants, warning-free lint, all 54 tests, the production build, backend TypeScript validation, and a production dependency audit with 0 vulnerabilities; the integrated audit could not reach npm from the workspace sandbox, and the identical network-enabled audit passed immediately afterward. `npm run verify:release` separately failed exactly on the five truthful open blockers: legal identity review, contact verification, contact monitoring, jurisdiction review, and qualified legal review. Review the complete diff and request explicit commit approval afterward.
+
 ## 2026-08-07 — Self-service administrator password recovery Beta acceptance
 
 ### Stage

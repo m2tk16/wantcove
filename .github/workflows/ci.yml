@@ -28,6 +28,9 @@ jobs:
       - name: Beta fast gate
         if: github.base_ref == 'beta' || github.ref == 'refs/heads/beta'
         run: npm run check:fast
+      - name: Production readiness gate
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: npm run verify:release
       - name: Production full gate
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: npm run check:full

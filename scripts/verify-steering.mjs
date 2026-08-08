@@ -8,6 +8,7 @@ const requirements = new Map([
   ['.agents/ENVIRONMENTS.md', ['Beta', 'Production', '`beta`', '`main`']],
   ['.agents/ARCHITECTURE.md', ['## Structure', '## Rules', '## Dependency direction']],
   ['.agents/LEGAL.md', ['## Terms review triggers', '## Privacy review triggers', '## Affiliate disclosure rules']],
+  ['.agents/PRODUCTION_READINESS.json', ['"schemaVersion": 1', '"legalIdentityStatus"', '"qualifiedLegalReview"']],
 ])
 
 const failures = []
