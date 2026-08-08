@@ -10,7 +10,9 @@ type ResponsiveProductImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'al
 export function ResponsiveProductImage({ alt, src, sizes = '100vw', pictureClassName, ...imageProps }: ResponsiveProductImageProps) {
   const variants = getProductImageVariants(src)
   if (!variants) {
-    return <img {...imageProps} alt={alt} referrerPolicy="no-referrer" src={src} />
+    return <picture className={pictureClassName ?? 'product-picture'}>
+      <img {...imageProps} alt={alt} referrerPolicy="no-referrer" src={src} />
+    </picture>
   }
 
   const fallback = variants.webp.at(-1)

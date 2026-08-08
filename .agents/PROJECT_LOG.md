@@ -2,6 +2,25 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Dynamic product-image sizing candidate
+
+### Stage
+
+Local UI bug-fix candidate on `codex/fix-dynamic-product-image-layout`, based on PR #19 merge commit `f13a275` and successful Amplify Beta job 34. No commit, push, pull request, Beta deployment, Product mutation, backend change, `main` change, or Production deployment has been made by this candidate.
+
+### Observed and updated
+
+- Hosted Beta loaded the newly published LASFIT product and its 22,440-byte WebP successfully, but the managed-product row expanded the image across the card instead of rendering a compact thumbnail.
+- The shared responsive-image component discarded its `pictureClassName` whenever a safe first-party image did not have a preconfigured responsive manifest entry. That bare-image fallback bypassed admin, catalog, hero, thumbnail, and detail sizing contracts.
+- Unknown safe first-party images now retain the same `<picture>` wrapper and caller-provided class as manifest-backed images while still avoiding invented AVIF or WebP variant requests.
+- Added focused regression coverage proving that a dynamic product image keeps the admin sizing wrapper, renders its direct source, and emits no speculative `<source>` elements or `srcset`.
+
+### Security, privacy, rollback, and verification
+
+- This is a DOM presentation fix. It does not broaden the first-party media allowlist, change CSP, mutate the published Product, activate its retailer destination, change authorization, add storage, or alter personal-data processing. Terms and Privacy behavior remain unchanged.
+- Rollback is restoration of the prior bare `<img>` fallback; that rollback would intentionally restore oversized dynamic images wherever styling targets the shared wrapper.
+- Focused responsive-image coverage passed both tests. The normal fast gate passed steering, security, CI, and hosting invariants; warning-free lint; all 71 tests; and the 25-file, 787,490-byte optimized-media budget.
+
 ## 2026-08-08 — LASFIT product-image optimization candidate
 
 ### Stage
