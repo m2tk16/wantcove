@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import type { AdminProduct, AdminProductGateway, ProductDraft } from '../types'
 import { ProductEditor } from './ProductEditor'
 
@@ -68,7 +69,13 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
       </div> : null}
       {loading ? <p role="status">Loading managed products…</p> : products.length === 0 ? <p>No managed products yet.</p> : <div className="admin-product-cards">
         {products.map((product) => <article className="admin-product-card" key={product.slug}>
-          <img src={product.imageUrl} alt={product.imageAlt} loading="lazy" referrerPolicy="no-referrer" />
+          <ResponsiveProductImage
+            alt={product.imageAlt}
+            loading="lazy"
+            pictureClassName="admin-product-picture"
+            sizes="92px"
+            src={product.imageUrl}
+          />
           <div><div className="product-admin-meta"><span className={`status-pill status-${product.status.toLowerCase()}`}>{product.status}</span><code>{product.slug}</code></div><h3>{product.name}</h3><p>{product.category} · Updated {new Date(product.updatedAt).toLocaleDateString()}</p></div>
           <div className="admin-product-actions">
             <button disabled={busy} onClick={() => setEditing(product)} type="button">Edit</button>

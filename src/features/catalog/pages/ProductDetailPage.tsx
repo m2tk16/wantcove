@@ -1,4 +1,5 @@
 import { Link } from '../../../shared/navigation/Link'
+import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import { LikeButton } from '../../likes/LikeButton'
 import { useCatalog } from '../CatalogContext'
 import { ProductSection } from '../components/ProductSection'
@@ -13,9 +14,15 @@ export function ProductDetailPage({ product }: { product: Product }) {
     <div className="product-detail">
       <div className="product-gallery">
         <div className="thumbnail-column">
-          {[1, 2, 3].map((number) => <button key={number} type="button" aria-label={`View product image ${number}`}><img src={product.image} alt="" referrerPolicy="no-referrer" /></button>)}
+          {[1, 2, 3].map((number) => <button key={number} type="button" aria-label={`View product image ${number}`}><ResponsiveProductImage alt="" loading="lazy" sizes="74px" src={product.image} /></button>)}
         </div>
-        <img className="detail-image" src={product.image} alt={product.imageAlt ?? product.name} referrerPolicy="no-referrer" />
+        <ResponsiveProductImage
+          alt={product.imageAlt ?? product.name}
+          className="detail-image"
+          pictureClassName="detail-picture"
+          sizes="(max-width: 760px) 100vw, 55vw"
+          src={product.image}
+        />
       </div>
       <section className="product-info">
         <span className="kicker">{product.category} pick</span>

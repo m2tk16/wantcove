@@ -1,4 +1,5 @@
 import { Link } from '../../../shared/navigation/Link'
+import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import { LikeButton } from '../../likes/LikeButton'
 import type { Product } from '../types'
 
@@ -6,7 +7,12 @@ export function ProductCard({ product }: { product: Product }) {
   return <article className="product-card">
     <div className="product-image">
       <Link className="product-image-link" to={`/products/${product.slug}`}>
-        <img src={product.image} alt={product.imageAlt ?? product.name} loading="lazy" referrerPolicy="no-referrer" />
+        <ResponsiveProductImage
+          alt={product.imageAlt ?? product.name}
+          loading="lazy"
+          sizes="(max-width: 720px) 50vw, (max-width: 1100px) 33vw, 25vw"
+          src={product.image}
+        />
       </Link>
       <LikeButton productSlug={product.slug} productName={product.name} />
     </div>

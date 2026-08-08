@@ -1,4 +1,5 @@
 import { Link } from '../../../shared/navigation/Link'
+import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import { useCatalog } from '../CatalogContext'
 import { ProductSection, SectionHeading } from '../components/ProductSection'
 import { categories } from '../data/categories'
@@ -27,7 +28,15 @@ export function HomePage() {
           <p>Discover the most interesting, useful, and unusual products from across the web.</p>
           {featured ? <Link className="button" to={`/products/${featured.slug}`}>Explore the find <span>→</span></Link> : null}
         </div>
-        {featured ? <img src={featured.image} alt={featured.imageAlt ?? featured.name} referrerPolicy="no-referrer" /> : null}
+        {featured ? <ResponsiveProductImage
+          alt={featured.imageAlt ?? featured.name}
+          className="catalog-hero-image"
+          fetchPriority="high"
+          loading="eager"
+          pictureClassName="catalog-hero-media"
+          sizes="(max-width: 760px) 100vw, 60vw"
+          src={featured.image}
+        /> : null}
       </section>
       <section className="benefit-strip" aria-label="WantCove benefits">
         <div><b>◇</b><span><strong>No sign up</strong><small>Browse freely</small></span></div>

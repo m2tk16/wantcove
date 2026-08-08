@@ -39,3 +39,10 @@ WantCove is a professional feature-oriented React application. Keep composition 
 - The default Amplify Data authorization remains Cognito user-pool based. Any guest or identity-pool operation must opt in on the smallest possible GraphQL field.
 - Cognito User Pool groups emit preferred Identity Pool IAM roles. When a group member needs an Identity Pool operation, grant that group role only the explicitly authorized AppSync fields; do not grant the whole API or replace the server-issued group boundary. Place AppSync field policies in the Data stack when a custom stack already supplies resources or environment values to Data, preventing a reverse dependency and nested-stack cycle.
 - Each hosted branch owns an isolated Gen 2 stack. Schema and resolver changes flow through Beta validation before Production promotion.
+
+## Hosting and product-media boundaries
+
+- Root `customHttp.yml` is the reviewed source for Amplify Hosting response headers. Its Content Security Policy stays deny-by-default and allowlists only the first-party application plus the exact regional AppSync and Cognito endpoints used by the frontend; do not add broad AWS, external-image, inline-script, or inline-style allowances.
+- Public product media uses first-party `/products/` AVIF, JPEG, PNG, or WebP paths. The administrator UI and backend Function both enforce the path boundary; arbitrary external image hosts are not valid catalog input.
+- `src/shared/media/` owns reusable responsive-image rendering. Its explicit manifest may translate known legacy database paths to versioned AVIF/WebP sources, but it must not invent derived URLs for unknown records or import catalog feature code.
+- Product-media source variants are versioned in `public/products/`, checked against repository size budgets, and use intrinsic dimensions plus `srcset`/`sizes` to avoid layout shift and oversized mobile transfers.
