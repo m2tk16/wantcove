@@ -2,6 +2,26 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Hosting and first-party media hardening candidate
+
+### Stage
+
+Local backend and hosting candidate on `codex/harden-hosting-media`, based on accepted Beta commit `2ecf6c9`. No commit, push, pull request, Amplify deployment, Product or DynamoDB rewrite, cloud-resource mutation, `main` change, or Production deployment has been made.
+
+### Security, media, and architecture
+
+- Added repository-owned Amplify Hosting headers with HSTS, a deny-by-default Content Security Policy, clickjacking and MIME protections, bounded browser capabilities, cross-origin isolation headers, and explicit caching for built assets and product media. The CSP permits only first-party scripts, styles, and images plus the exact regional AppSync and Cognito connection boundaries used by the current frontend.
+- Restricted the product-management Function and administrator form to safe first-party `/products/` AVIF, JPEG, PNG, or WebP paths. Arbitrary HTTPS image hosts are no longer valid catalog input, while Amazon retailer URL validation remains a separate HTTPS allowlist.
+- Added a shared responsive-image component and explicit manifest that maps the four existing DynamoDB `*.png` paths to first-party responsive variants without rewriting hosted records. Unknown safe first-party paths render directly and never generate speculative requests.
+- Replaced four versioned 1.7–2.2 MB PNG files with visually checked 480/960/full-width AVIF and WebP variants. The 24 responsive files total 765,050 bytes, and automated checks cap each file at 150 KB and the set at 1 MB.
+
+### Privacy, compatibility, rollback, and verification
+
+- Updated the Privacy Policy's sharing section and August 8 updated date to describe the actual first-party AWS image-hosting boundary and external-host rejection. The Terms behavior and August 7 updated date remain unchanged; Production legal, contact, jurisdiction, and qualified-review blockers remain open.
+- Existing catalog records are backward compatible through the rendering manifest. New starter migrations use the largest WebP fallback, and no data migration or overwrite is required.
+- Rollback is a reviewed restoration of the PNG assets, direct image rendering, previous image validator, Privacy wording, and removal of `customHttp.yml`. If Beta exposes a missed network dependency, roll back the candidate rather than broadening CSP with `unsafe-inline`, `unsafe-eval`, or unrestricted external origins.
+- The hosting verifier passed with all required headers and 24 responsive assets. The complete backend-change coverage passed steering plus security, CI, and hosting invariants; warning-free lint; all 59 tests; the production build; backend TypeScript validation; and a network-enabled production dependency audit with 0 vulnerabilities. The first integrated run exposed one transient five-second CDK test timeout that passed immediately in isolation; the second integrated run passed all tests and deterministic stages, then waited on the sandboxed audit until the command limit, so the identical audit was completed with network access. Local desktop structure and 390×844 mobile Privacy/layout checks passed with no warning or error; live catalog image transfer acceptance remains for protected Beta because branch-specific Amplify outputs are intentionally not stored locally.
+
 ## 2026-08-07 — Production-readiness gate Beta acceptance
 
 ### Stage

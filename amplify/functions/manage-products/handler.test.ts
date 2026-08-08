@@ -23,7 +23,7 @@ const productInput = {
   name: 'Smart Reading Light',
   description: 'A focused desk light with a flexible arm and warm color modes.',
   category: 'Home',
-  imageUrl: 'https://images.example.com/reading-light.jpg',
+  imageUrl: '/products/reading-light.webp',
   imageAlt: 'Black reading light on a wooden desk',
   amazonAsin: 'B012345678',
   retailerUrl: 'https://www.amazon.com/dp/B012345678?tag=wantcove-20',
@@ -78,7 +78,12 @@ describe('manage-products Function', () => {
       ...productInput,
       slug: 'unsafe-image-path',
       imageUrl: '/uploads/reading-light.svg',
-    }))).rejects.toThrow(/safe \/products\//);
+    }))).rejects.toThrow(/first-party \/products\//);
+    await expect(handler(event({
+      ...productInput,
+      slug: 'external-image-host',
+      imageUrl: 'https://images.example.com/reading-light.jpg',
+    }))).rejects.toThrow(/first-party \/products\//);
   });
 
   it('rejects non-admin identities and unsafe retailer URLs before writing', async () => {

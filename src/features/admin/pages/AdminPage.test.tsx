@@ -9,7 +9,7 @@ const product: AdminProduct = {
   name: 'Smart Reading Light',
   description: 'A focused desk light with a flexible arm and warm color modes.',
   category: 'Home',
-  imageUrl: 'https://images.example.com/reading-light.jpg',
+  imageUrl: '/products/reading-light.webp',
   imageAlt: 'Black reading light on a wooden desk',
   amazonAsin: 'B012345678',
   retailerUrl: 'https://www.amazon.com/dp/B012345678',
@@ -95,6 +95,8 @@ describe('AdminPage', () => {
       name: product.name,
     })))
     expect(screen.queryByLabelText('Status')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Image location')).toHaveAttribute('pattern', expect.stringContaining('/products/'))
+    expect(screen.getByText(/Product images must use a first-party \/products\//)).toBeInTheDocument()
   })
 
   it('offers the guarded starter migration and refreshes the catalog after it completes', async () => {

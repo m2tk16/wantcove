@@ -16,6 +16,8 @@ Update the Terms in the same release whenever a major change affects affiliate o
 
 Update the Privacy Policy before materially changing personal data collection, authentication, saved content, analytics, cookies, advertising, personalization, affiliate click tracking, vendors/subprocessors, purposes, sharing, retention, deletion, security, children’s access, international transfers, or user privacy rights.
 
+Current product-media rule: public catalog images are served through WantCove's first-party `/products/` path on AWS hosting, and administrator mutations reject arbitrary external image hosts. The Privacy Policy must be reviewed in the same release if that boundary or its hosting vendors change.
+
 ## Affiliate disclosure rules
 
 - Before any compensated product link is activated, place a plain-language disclosure close enough that a user can see the relationship and the link together.

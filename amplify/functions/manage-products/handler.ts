@@ -117,13 +117,10 @@ function requireHttpsUrl(value: string | null | undefined, label: string) {
 
 function requireImageLocation(value: string | null | undefined) {
   const raw = requireString(value, 'Image location', 1, 2_048);
-  if (raw.startsWith('/')) {
-    if (!FIRST_PARTY_PRODUCT_IMAGE_PATTERN.test(raw)) {
-      throw new Error('Image location must use a safe /products/ image path.');
-    }
-    return raw;
+  if (!FIRST_PARTY_PRODUCT_IMAGE_PATTERN.test(raw)) {
+    throw new Error('Image location must use a safe first-party /products/ image path.');
   }
-  return requireHttpsUrl(raw, 'Image location').toString();
+  return raw;
 }
 
 function optionalDisplayLabel(value: string | null | undefined, label: string, max: number) {
