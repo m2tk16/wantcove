@@ -2,6 +2,25 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Product deep-link loading-state Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for PR #16 merge commit `77c47c9`. Amplify Beta job 31 completed BUILD, DEPLOY, and VERIFY successfully. This completion record is local on `codex/record-deep-link-loading-acceptance`; no documentation commit, push, `main` change, Production deployment, or Production resource has been created.
+
+### Hosted acceptance
+
+- A fresh cache-busted direct request to `/products/levitating-globe-lamp` rendered the accessible `Finding that product...` busy status throughout the public GraphQL catalog request, then rendered the complete Levitating Globe Lamp detail page. Twelve quarter-second observations covered the transition and none displayed the 404 experience.
+- A fresh direct request to an intentionally missing product slug rendered the same loading status first, then rendered `That find wandered off.` only after the completed catalog response confirmed that the slug was absent. The 404 did not appear during the pending state.
+- GitHub's required `Branch policy check` passed before merge, the pull request contained one scoped commit with no conflict, and the protected merge started only the expected Beta deployment.
+
+### Security, data, legal, and rollback review
+
+- Acceptance invoked no Product mutation, like-preference mutation, retailer destination, administrator action, or Production request. Public catalog reads and any consented like-state reads retained their existing authorization, privacy-choice, and short-lived rate-counter boundaries.
+- The fix changes presentation state only. Authentication, GraphQL contracts, cookies, personal-data use, affiliate disclosures, Terms, and Privacy behavior remain unchanged, so no policy update is triggered.
+- Beta rollback is redeployment of successful job 30 at commit `d3cce54`; that rollback would restore the misleading transient 404. Production remains unchanged and blocked by the recorded legal-readiness requirements.
+- The candidate fast gate passed steering, security, CI and hosting invariants, warning-free lint, all 70 tests, and the production build before protected publication.
+
 ## 2026-08-08 — Product deep-link loading-state candidate
 
 ### Stage
