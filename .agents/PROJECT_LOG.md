@@ -2,6 +2,37 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — GraphQL catalog and request-loop Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for merge commit `5ed8d72` from PR #4. This completion record is local on `codex/record-catalog-acceptance`; no documentation commit, push, Production branch, or Production resource has been changed.
+
+### Deployment evidence
+
+- The remote `beta` branch resolves to `5ed8d7253da15a5f90992e1693957e7409b54b75`, whose merge message identifies PR #4 and the reviewed fixture-removal commit `2263211`.
+- Amplify Beta job 18 completed BUILD, DEPLOY, and VERIFY successfully. BUILD completed at 2026-08-08 01:49:48 UTC and the complete job reached `SUCCEED` at 01:49:56 UTC.
+- Production remained untouched; no migration action, Product write, affiliate destination, or Production promotion occurred during deployment.
+
+### Hosted acceptance
+
+- The anonymous storefront rendered exactly the four managed Product records with the accepted featured order, first-party images, display prices, and display ratings. No code fixture is available to fill a missing live record.
+- The global footer displayed the exact Amazon Associate identification statement and continued to state that retailer links remain disabled. The restricted `/admin` route continued to present administrator-only MFA sign-in in the signed-out verification session.
+- Browser logs contained no application error. CloudWatch recorded exactly four Beta product-like Function invocations during the initial hosted page-load minute—one for each unique product even though each appears in two sections—and no additional invocation datapoint through the following idle metrics windows. The repeated-request storm did not recur.
+- The hosted session was intentionally not given administrator credentials. The automated regression separately covers the rejected cloud-read path with duplicate cards and proves one request plus a stable session-only fallback; the underlying signed-in administrator Identity Pool fallback remains a separate tracked bug.
+
+### Security, data, legal, and rollback review
+
+- Every hosted product now comes from the read-only public GraphQL projection, and every like path verifies a consistently read `PUBLISHED` Product before touching the identity-scoped like table. Missing, draft, archived, or failed catalog reads fail closed.
+- The four migrated Product rows remain unchanged. Normal administrator archive/delete behavior is now authoritative because there is no public fixture fallback; reserved starter slugs remain recoverable only through the deliberate non-overwriting migration.
+- The required Amazon site statement is now deployed, but near-link disclosure, verified Special Links, Program Content compliance, operator/contact/jurisdiction details, and qualified review still block every commercial retailer action and Production.
+- Rollback remains a reviewed revert of `5ed8d72` through Beta. No data rollback is required unless an administrator independently changes Product lifecycle state.
+
+### Verification and next
+
+- Local release gates before merge passed steering, security and CI invariants, warning-free lint, all 45 tests, the production build, backend TypeScript validation, and a production audit with 0 vulnerabilities. GitHub’s required `Branch policy check` passed before merge.
+- Record this hosted result through the protected documentation flow, then prioritize the remaining authenticated-admin Identity Pool fallback and other P1/P2 guardrails before affiliate-link activation or Production promotion.
+
 ## 2026-08-07 — Managed-catalog Beta acceptance and fixture-removal candidate
 
 ### Stage
