@@ -2,6 +2,32 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Authenticated administrator like-role repair candidate
+
+### Stage
+
+Local backend authorization repair on `codex/fix-admin-like-identity`, based on merged Beta commit `6217889`. No commit, push, deployment, hosted data write, Production branch, or Production resource has been changed.
+
+### Root cause and change
+
+- Read-only inspection confirmed that the Beta Identity Pool uses token-based role mapping. Cognito therefore honors the `ADMINS` User Pool group’s preferred IAM role for the signed-in administrator instead of the generic authenticated role.
+- The generated generic authenticated and guest roles each had a field-scoped AppSync policy for the two like operations, while the preferred `ADMINS` role had no attached or inline policy. This explains why anonymous likes worked and the administrator fell back to session-only state before the Function was invoked.
+- Added a narrow CDK policy granting the existing `ADMINS` preferred role only `appsync:GraphQL` on `getViewerProductLike` and `setViewerProductLike`.
+- The policy is synthesized in the existing third `ProductLikes` stack so it may reference both the Auth role and Data API without introducing an Auth↔Data circular dependency.
+
+### Security, data, legal, and rollback review
+
+- User Pool group membership and required TOTP remain the administrator boundary. Default Data authorization remains User Pool based; no public field, model permission, self-registration path, admin mutation, DynamoDB permission, wildcard resource, or client-supplied identity was added.
+- The like Function still derives the actor key from the AppSync Cognito Identity ID, validates a consistently read `PUBLISHED` product, and retains the 180-day TTL. Existing Product and like rows are not migrated or rewritten by this change.
+- No new cookie, personal data, affiliate destination, purchase flow, disclosure, Terms, or Privacy practice is introduced, so the legal documents do not require an update.
+- Rollback is a reviewed revert of the field-scoped policy. A rollback removes signed-in administrator cloud-like access but does not delete data or broaden another role.
+
+### Tests and next
+
+- Added a CDK synthesis regression that asserts one IAM policy with exactly the two like-field ARNs, the single `appsync:GraphQL` action, the `ADMINS` role attachment, and no wildcard or product-management field.
+- The full authorization-change gate passes: steering, backend-security and CI invariants; warning-free lint; all 46 tests; production build; backend TypeScript validation; and a production dependency audit with 0 vulnerabilities. The audit was rerun with network access after the sandbox blocked npm’s registry endpoint.
+- After a protected Beta deployment, verify signed-in Like → reload persistence → Unlike → reload removal, confirm the Function receives the requests without an idle request loop, and inspect the deployed preferred-role policy before closing the backlog bug.
+
 ## 2026-08-07 — GraphQL catalog and request-loop Beta acceptance
 
 ### Stage

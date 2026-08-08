@@ -5,6 +5,7 @@ import { data } from './data/resource';
 import { manageProductsFunction } from './functions/manage-products/resource';
 import { publicCatalogFunction } from './functions/public-catalog/resource';
 import { productLikesFunction } from './functions/product-likes/resource';
+import { attachAdminProductLikesPolicy } from './policies/admin-product-likes';
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -36,6 +37,15 @@ backend.publicCatalogFunction.addEnvironment('PRODUCT_TABLE_NAME', productTable.
 backend.productLikesFunction.addEnvironment('PRODUCT_TABLE_NAME', productTable.tableName);
 
 const productLikesStack = backend.createStack('ProductLikes');
+// Identity Pools honor the preferred IAM role emitted for a User Pool group.
+// Attach this field-scoped policy from the third ProductLikes stack so Auth and
+// Data do not gain a circular cross-stack dependency.
+attachAdminProductLikesPolicy(
+  productLikesStack,
+  backend.data.resources.graphqlApi.arn,
+  backend.auth.resources.groups['ADMINS'].role,
+);
+
 const productLikesTable = new Table(productLikesStack, 'ProductLikesTable', {
   partitionKey: { name: 'productSlug', type: AttributeType.STRING },
   sortKey: { name: 'actorKey', type: AttributeType.STRING },
