@@ -10,6 +10,8 @@ const publicCatalogFunctionResource = await readFile('amplify/functions/public-c
 const publicCatalogHandler = await readFile('amplify/functions/public-catalog/handler.ts', 'utf8')
 const productLikesFunctionResource = await readFile('amplify/functions/product-likes/resource.ts', 'utf8')
 const productLikesHandler = await readFile('amplify/functions/product-likes/handler.ts', 'utf8')
+const productLikesAbuseControls = await readFile('amplify/functions/product-likes/abuse-controls.ts', 'utf8')
+const productLikesMonitoring = await readFile('amplify/monitoring/product-like-abuse-controls.ts', 'utf8')
 const adminProductLikesPolicy = await readFile('amplify/policies/admin-product-likes.ts', 'utf8')
 const catalogProvider = await readFile('src/features/catalog/CatalogProvider.tsx', 'utf8')
 
@@ -97,8 +99,25 @@ if (!/cognitoIdentityId/.test(productLikesHandler)) {
   failures.push('Product-like Function must derive its actor key from Cognito identity')
 }
 
-if (/sourceIp|arguments\.actorKey/.test(productLikesHandler)) {
+if (/sourceIp|arguments\.actorKey/.test(`${productLikesHandler}\n${productLikesAbuseControls}`)) {
   failures.push('Product-like Function must not trust an IP address or client-supplied actor key')
+}
+
+if (!/PRODUCT_LIKE_RATE_LIMIT_MAX_REQUESTS\s*=\s*60/.test(productLikesAbuseControls) ||
+    !/PRODUCT_LIKE_RATE_LIMIT_WINDOW_SECONDS\s*=\s*60/.test(productLikesAbuseControls) ||
+    !/ConditionExpression:\s*['"]attribute_not_exists\(requestCount\) OR requestCount < :limit['"]/.test(productLikesAbuseControls)) {
+  failures.push('Product-like requests must retain the identity-scoped fixed-window rate limit')
+}
+
+if (!/Dimensions:\s*\[\[\]\]/.test(productLikesAbuseControls) || /productSlug.*RateLimitedRequests|actorKey.*RateLimitedRequests/.test(productLikesAbuseControls)) {
+  failures.push('Product-like rate-limit metrics must remain aggregate and free of identity or product dimensions')
+}
+
+if (!/reservedConcurrentExecutions\s*=\s*PRODUCT_LIKES_RESERVED_CONCURRENCY/.test(productLikesMonitoring) ||
+    !/PRODUCT_LIKES_RESERVED_CONCURRENCY\s*=\s*10/.test(productLikesMonitoring) ||
+    !/ProductLikeRateLimitAlarm/.test(productLikesMonitoring) ||
+    !/ProductLikeThrottleAlarm/.test(productLikesMonitoring)) {
+  failures.push('Product-like infrastructure must retain bounded concurrency and abuse alarms')
 }
 
 if (!/PRODUCT_TABLE_NAME/.test(productLikesHandler) || !/status\s*!==\s*['"]PUBLISHED['"]/.test(productLikesHandler)) {
@@ -149,8 +168,17 @@ if (!/PRODUCT_LIKE_TTL_SECONDS\s*=\s*60\s*\*\s*60\s*\*\s*24\s*\*\s*180/.test(pro
   failures.push('Anonymous like records must use the documented 180-day TTL')
 }
 
+if (!/ConditionExpression:\s*['"]attribute_not_exists\(productSlug\) OR expiresAt <= :now['"]/.test(productLikesHandler) ||
+    !/ConditionExpression:\s*['"]attribute_exists\(productSlug\)['"]/.test(productLikesHandler)) {
+  failures.push('Product-like writes must retain conditional idempotency guards')
+}
+
 if (!/timeoutSeconds\s*:\s*10/.test(productLikesFunctionResource)) {
   failures.push('Product-like Function must retain a bounded execution timeout')
+}
+
+if (!/logging\s*:\s*\{[\s\S]*format\s*:\s*['"]text['"][\s\S]*retention\s*:\s*['"]1 month['"]/.test(productLikesFunctionResource)) {
+  failures.push('Product-like Function logs must retain a bounded one-month expiration compatible with aggregate metrics')
 }
 
 if (![productLikesFunctionResource, manageProductsFunctionResource, publicCatalogFunctionResource].every((resource) => /resourceGroupName\s*:\s*['"]data['"]/.test(resource))) {

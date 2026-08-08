@@ -6,6 +6,7 @@ import {
   PutCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { AppSyncIdentity, AppSyncResolverHandler } from 'aws-lambda';
+import { enforceProductLikeRateLimit, isConditionalCheckFailed } from './abuse-controls';
 
 const PRODUCT_LIKE_TTL_SECONDS = 60 * 60 * 24 * 180;
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
@@ -42,13 +43,22 @@ function requireActorKey(identity: AppSyncIdentity) {
   return identity.cognitoIdentityId;
 }
 
-export function createProductLikesHandler(send: SendCommand) {
+export function createProductLikesHandler(send: SendCommand, now = () => Date.now()) {
   return async (event: ProductLikeEvent): Promise<boolean> => {
     const { productSlug, liked } = event.arguments;
     const actorKey = requireActorKey(event.identity);
+    const TableName = requireTableName();
+    const nowSeconds = Math.floor(now() / 1000);
+    await enforceProductLikeRateLimit({
+      send,
+      tableName: TableName,
+      actorKey,
+      nowSeconds,
+    });
     if (typeof productSlug !== 'string' || productSlug.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productSlug)) {
       throw new Error('Unknown product.');
     }
+
     const product = await send(new GetCommand({
       TableName: requireProductTableName(),
       Key: { slug: productSlug },
@@ -58,7 +68,6 @@ export function createProductLikesHandler(send: SendCommand) {
     }));
     if (product.Item?.status !== 'PUBLISHED') throw new Error('Unknown product.');
 
-    const TableName = requireTableName();
     const Key = { productSlug, actorKey };
 
     if (liked === undefined) {
@@ -70,7 +79,7 @@ export function createProductLikesHandler(send: SendCommand) {
       }));
       return Boolean(
         typeof result.Item?.expiresAt === 'number' &&
-          result.Item.expiresAt > Math.floor(Date.now() / 1000),
+          result.Item.expiresAt > nowSeconds,
       );
     }
 
@@ -79,15 +88,29 @@ export function createProductLikesHandler(send: SendCommand) {
     }
 
     if (liked) {
-      await send(new PutCommand({
-        TableName,
-        Item: {
-          ...Key,
-          expiresAt: Math.floor(Date.now() / 1000) + PRODUCT_LIKE_TTL_SECONDS,
-        },
-      }));
+      try {
+        await send(new PutCommand({
+          TableName,
+          Item: {
+            ...Key,
+            expiresAt: nowSeconds + PRODUCT_LIKE_TTL_SECONDS,
+          },
+          ConditionExpression: 'attribute_not_exists(productSlug) OR expiresAt <= :now',
+          ExpressionAttributeValues: { ':now': nowSeconds },
+        }));
+      } catch (error) {
+        if (!isConditionalCheckFailed(error)) throw error;
+      }
     } else {
-      await send(new DeleteCommand({ TableName, Key }));
+      try {
+        await send(new DeleteCommand({
+          TableName,
+          Key,
+          ConditionExpression: 'attribute_exists(productSlug)',
+        }));
+      } catch (error) {
+        if (!isConditionalCheckFailed(error)) throw error;
+      }
     }
 
     return liked;

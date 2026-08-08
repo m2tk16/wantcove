@@ -40,14 +40,19 @@ export function LikesProvider({ children, likes = productLikesClient }: { childr
   }, [choice, likes])
 
   const toggle = useCallback((slug: ProductSlug) => {
-    const liked = !(states[slug]?.liked ?? false)
-    setStates((current) => ({ ...current, [slug]: { liked, loading: false, loaded: true, source: choice === 'preferences' && likes.isAvailable ? 'cloud' : 'session' } }))
+    if (loading.current.has(slug)) return
+    const liked = !(statesRef.current[slug]?.liked ?? false)
+    const cloudEnabled = choice === 'preferences' && likes.isAvailable
+    setStates((current) => ({ ...current, [slug]: { liked, loading: cloudEnabled, loaded: true, source: cloudEnabled ? 'cloud' : 'session' } }))
 
-    if (choice === 'preferences' && likes.isAvailable) {
+    if (cloudEnabled) {
+      loading.current.add(slug)
       void likes.set(slug, liked)
+        .then((savedLike) => setStates((current) => ({ ...current, [slug]: { liked: savedLike, loading: false, loaded: true, source: 'cloud' } })))
         .catch(() => setStates((current) => ({ ...current, [slug]: { liked, loading: false, loaded: true, source: 'session', error: 'Cloud sync is unavailable; this like is session-only.' } })))
+        .finally(() => loading.current.delete(slug))
     }
-  }, [choice, likes, states])
+  }, [choice, likes])
 
   const value = useMemo<LikesContextValue>(() => ({
     getState: (slug) => states[slug] ?? EMPTY_STATE,
