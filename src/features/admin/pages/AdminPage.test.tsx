@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { AdminAuthGateway, AdminProduct, AdminProductGateway } from '../types'
 import { AdminPage } from './AdminPage'
@@ -107,7 +107,8 @@ describe('AdminPage', () => {
 
     fireEvent.change(await screen.findByLabelText('Slug'), { target: { value: product.slug } })
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: product.name } })
-    fireEvent.change(screen.getByLabelText('Category'), { target: { value: product.category } })
+    fireEvent.change(screen.getByLabelText('Category'), { target: { value: '__add-category__' } })
+    fireEvent.change(screen.getByLabelText('New category'), { target: { value: 'Automotive' } })
     fireEvent.change(screen.getByLabelText('Featured rank'), { target: { value: String(product.featuredRank) } })
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: product.description } })
     fireEvent.change(screen.getByLabelText('Deployed image path'), { target: { value: product.imageUrl } })
@@ -119,13 +120,38 @@ describe('AdminPage', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Image location must use a safe first-party /products/ image path.')
     expect(screen.getByLabelText('Slug')).toHaveValue(product.slug)
     expect(screen.getByLabelText('Name')).toHaveValue(product.name)
-    expect(screen.getByLabelText('Category')).toHaveValue(product.category)
+    expect(screen.getByLabelText('Category')).toHaveValue('__add-category__')
+    expect(screen.getByLabelText('New category')).toHaveValue('Automotive')
     expect(screen.getByLabelText('Featured rank')).toHaveValue(product.featuredRank)
     expect(screen.getByLabelText('Description')).toHaveValue(product.description)
     expect(screen.getByLabelText('Deployed image path')).toHaveValue(product.imageUrl)
     expect(screen.getByLabelText('Image alt text')).toHaveValue(product.imageAlt)
     expect(screen.getByLabelText('Amazon ASIN')).toHaveValue(product.amazonAsin)
     expect(screen.getByLabelText('Amazon URL')).toHaveValue(product.retailerUrl)
+  })
+
+  it('offers configured and managed categories and can add a validated category', async () => {
+    const automotiveProduct = { ...product, category: 'Automotive' }
+    const productCatalog = catalog([automotiveProduct])
+    render(<AdminPage auth={adminAuth()} catalog={productCatalog} />)
+
+    const category = await screen.findByLabelText('Category')
+    expect(within(category).getByRole('option', { name: 'Gadgets' })).toBeInTheDocument()
+    expect(
+      await within(category).findByRole('option', { name: 'Automotive' }),
+    ).toBeInTheDocument()
+    expect(within(category).queryByRole('option', { name: 'Trending' })).not.toBeInTheDocument()
+
+    fireEvent.change(category, { target: { value: '__add-category__' } })
+    fireEvent.change(screen.getByLabelText('New category'), { target: { value: 'Office' } })
+    fireEvent.change(screen.getByLabelText('Slug'), { target: { value: product.slug } })
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: product.name } })
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: product.description } })
+    fireEvent.change(screen.getByLabelText('Deployed image path'), { target: { value: product.imageUrl } })
+    fireEvent.change(screen.getByLabelText('Image alt text'), { target: { value: product.imageAlt } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create draft' }))
+
+    await waitFor(() => expect(productCatalog.create).toHaveBeenCalledWith(expect.objectContaining({ category: 'Office' })))
   })
 
   it('offers the guarded starter migration and refreshes the catalog after it completes', async () => {

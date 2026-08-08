@@ -67,6 +67,7 @@
 
 .admin-auth-card input,
 .product-editor input,
+.product-editor select,
 .product-editor textarea {
   width: 100%;
   padding: 11px 12px;
@@ -84,6 +85,7 @@
 
 .admin-auth-card input:focus,
 .product-editor input:focus,
+.product-editor select:focus,
 .product-editor textarea:focus {
   border-color: var(--accent);
   outline: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
