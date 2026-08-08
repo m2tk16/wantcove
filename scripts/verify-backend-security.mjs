@@ -113,6 +113,10 @@ if (!/migrateStarterProducts/.test(manageProductsHandler) || !/BatchGetCommand/.
   failures.push('Starter migration must read existing records and create missing records transactionally')
 }
 
+if (!/event\.fieldName\s*\?\?\s*event\.info\?\.fieldName/.test(manageProductsHandler)) {
+  failures.push('Shared catalog Function must dispatch from Amplify\'s top-level fieldName payload')
+}
+
 if (!/RESERVED_STARTER_SLUGS\.has\(slug\)[\s\S]*input\.action === ['"]ARCHIVE['"][\s\S]*input\.action === ['"]DELETE['"]/.test(manageProductsHandler)) {
   failures.push('Starter records must resist archive/delete while fixture fallback is active')
 }

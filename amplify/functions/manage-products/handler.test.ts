@@ -35,7 +35,7 @@ function event(
   identity: AppSyncIdentity = adminIdentity,
   fieldName = 'manageProduct',
 ) {
-  return { arguments: argumentsValue, identity, info: { fieldName } } as never;
+  return { arguments: argumentsValue, identity, fieldName } as never;
 }
 
 describe('manage-products Function', () => {
@@ -87,6 +87,14 @@ describe('manage-products Function', () => {
 
     await expect(handler(event(productInput, viewerIdentity))).rejects.toThrow('Unauthorized');
     await expect(handler(event({ ...productInput, retailerUrl: 'https://example.com/item' }))).rejects.toThrow(/Amazon/);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('returns a bounded validation error when a manage-product slug is missing', async () => {
+    const send = vi.fn();
+    const handler = createManageProductsHandler(send);
+
+    await expect(handler(event({ action: 'DELETE' }))).rejects.toThrow('Slug must be 3-80');
     expect(send).not.toHaveBeenCalled();
   });
 

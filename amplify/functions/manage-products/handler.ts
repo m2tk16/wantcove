@@ -36,6 +36,7 @@ type ManageProductArguments = {
 
 type ManageProductEvent = {
   arguments: ManageProductArguments;
+  fieldName?: string;
   identity?: AppSyncIdentity;
   info?: { fieldName?: string };
 };
@@ -155,8 +156,8 @@ function optionalRank(value: number | null | undefined) {
   return value;
 }
 
-function requireSlug(value: string) {
-  const slug = value.trim();
+function requireSlug(value: string | null | undefined) {
+  const slug = value?.trim() ?? '';
   if (slug.length < 3 || slug.length > 80 || !SLUG_PATTERN.test(slug)) {
     throw new Error('Slug must be 3-80 lowercase letters, numbers, or single hyphens.');
   }
@@ -253,7 +254,8 @@ export function createManageProductsHandler(send: SendCommand) {
     const TableName = requireTableName();
     const now = new Date().toISOString();
 
-    if (event.info?.fieldName === 'migrateStarterProducts') {
+    const fieldName = event.fieldName ?? event.info?.fieldName;
+    if (fieldName === 'migrateStarterProducts') {
       return migrateStarterProducts(send, TableName, now);
     }
 
