@@ -44,15 +44,17 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
       setEditing(undefined)
       setDeleting(undefined)
       await refresh()
+      return true
     } catch (caught) {
       setError(errorMessage(caught))
+      return false
     } finally {
       setBusy(false)
     }
   }
 
   async function save(product: ProductDraft) {
-    await run(() => editing ? catalog.update(product) : catalog.create(product))
+    return run(() => editing ? catalog.update(product) : catalog.create(product))
   }
 
   const managedSlugs = new Set(products.map(({ slug }) => slug))
