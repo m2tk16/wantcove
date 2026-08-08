@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CatalogProvider } from '../features/catalog/CatalogProvider'
+import { CatalogProvider, type CatalogGateway } from '../features/catalog/CatalogProvider'
+import type { Product } from '../features/catalog/types'
 import { LikesProvider } from '../features/likes/LikesProvider'
 import { PrivacyPreferencesProvider } from '../features/privacy/PrivacyPreferencesProvider'
 import { PrivacySettingsButton } from '../features/privacy/PrivacySettingsButton'
@@ -12,9 +13,9 @@ import { SiteHeader } from '../shared/layout/SiteHeader'
 import { usePathname } from '../shared/navigation/usePathname'
 import { resolveRoute } from './routes'
 
-export default function App() {
+export default function App({ catalog, initialProducts }: { catalog?: CatalogGateway; initialProducts?: Product[] }) {
   const path = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  return <PrivacyPreferencesProvider><ThemeProvider><CatalogProvider><LikesProvider><div className="site-shell"><SiteHeader menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} themeControl={<ThemeToggle />} /><MobileDrawer open={menuOpen} onClose={() => setMenuOpen(false)} /><main>{resolveRoute(path)}</main><SiteFooter privacyControl={<PrivacySettingsButton />} /><StorageNotice /></div></LikesProvider></CatalogProvider></ThemeProvider></PrivacyPreferencesProvider>
+  return <PrivacyPreferencesProvider><ThemeProvider><CatalogProvider catalog={catalog} initialProducts={initialProducts}><LikesProvider><div className="site-shell"><SiteHeader menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} themeControl={<ThemeToggle />} /><MobileDrawer open={menuOpen} onClose={() => setMenuOpen(false)} /><main>{resolveRoute(path)}</main><SiteFooter privacyControl={<PrivacySettingsButton />} /><StorageNotice /></div></LikesProvider></CatalogProvider></ThemeProvider></PrivacyPreferencesProvider>
 }

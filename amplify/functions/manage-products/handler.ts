@@ -282,10 +282,6 @@ export function createManageProductsHandler(send: SendCommand) {
     if (!isStoredProduct(result.Item)) throw new Error('Product not found.');
     const existing = result.Item;
 
-    if (RESERVED_STARTER_SLUGS.has(slug) && (input.action === 'ARCHIVE' || input.action === 'DELETE')) {
-      throw new Error('Starter products cannot be archived or deleted while fixture fallback is active.');
-    }
-
     if (input.action === 'DELETE') {
       await send(new DeleteCommand({
         TableName,

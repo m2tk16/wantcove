@@ -2,10 +2,64 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
+import type { CatalogGateway } from './features/catalog/CatalogProvider'
+import type { Product } from './features/catalog/types'
+
+const testProducts: Product[] = [
+  {
+    slug: 'levitating-globe-lamp',
+    name: 'Levitating Globe Lamp',
+    description: 'A warm sculptural light with a magnetic floating globe that turns an ordinary desk into a conversation piece.',
+    category: 'Gadgets',
+    image: '/products/globe-lamp.png',
+    imageAlt: 'Black levitating globe lamp in a warm room',
+    price: '$79.99',
+    rating: '4.8',
+    featuredRank: 1,
+  },
+  {
+    slug: 'adjustable-dumbbell-set',
+    name: 'Adjustable Dumbbell Set',
+    description: 'A compact strength setup with quick weight changes and a clean footprint for smaller workout spaces.',
+    category: 'Fitness',
+    image: '/products/adjustable-dumbbells.png',
+    imageAlt: 'Adjustable black and red dumbbell set',
+    price: '$299.99',
+    rating: '4.7',
+    featuredRank: 2,
+  },
+  {
+    slug: 'portable-pizza-oven',
+    name: 'Portable Pizza Oven',
+    description: 'A tabletop outdoor oven designed for crisp, flame-kissed pizza without taking over the whole patio.',
+    category: 'Outdoors',
+    image: '/products/pizza-oven.png',
+    imageAlt: 'Portable outdoor pizza oven',
+    price: '$129.99',
+    rating: '4.9',
+    featuredRank: 3,
+  },
+  {
+    slug: 'wireless-earbuds',
+    name: 'Pearl Wireless Earbuds',
+    description: 'Minimal everyday earbuds with a pocketable case, balanced sound, and a softly rounded fit.',
+    category: 'Tech',
+    image: '/products/wireless-earbuds.png',
+    imageAlt: 'White wireless earbuds in their charging case',
+    price: '$89.99',
+    rating: '4.6',
+    featuredRank: 4,
+  },
+]
+
+const testCatalog: CatalogGateway = {
+  isAvailable: false,
+  list: async () => testProducts,
+}
 
 function renderAt(path: string) {
   window.history.replaceState({}, '', path)
-  return render(<App />)
+  return render(<App catalog={testCatalog} initialProducts={testProducts} />)
 }
 
 describe('WantCove discovery routes', () => {
@@ -56,6 +110,7 @@ describe('WantCove discovery routes', () => {
   it('keeps Terms and Privacy available from the footer without primary navigation links', () => {
     const view = renderAt('/terms')
     expect(screen.getByRole('heading', { name: 'Terms of Service' })).toBeInTheDocument()
+    expect(screen.getAllByText('As an Amazon Associate I earn from qualifying purchases.')).toHaveLength(2)
     expect(screen.getByText(/affiliate or referral code/i)).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Legal' })).toBeInTheDocument()
     view.unmount()

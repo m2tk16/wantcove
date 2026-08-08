@@ -10,6 +10,7 @@ const publicCatalogFunctionResource = await readFile('amplify/functions/public-c
 const publicCatalogHandler = await readFile('amplify/functions/public-catalog/handler.ts', 'utf8')
 const productLikesFunctionResource = await readFile('amplify/functions/product-likes/resource.ts', 'utf8')
 const productLikesHandler = await readFile('amplify/functions/product-likes/handler.ts', 'utf8')
+const catalogProvider = await readFile('src/features/catalog/CatalogProvider.tsx', 'utf8')
 
 const requirements = [
   {
@@ -98,7 +99,11 @@ if (/sourceIp|arguments\.actorKey/.test(productLikesHandler)) {
 }
 
 if (!/PRODUCT_TABLE_NAME/.test(productLikesHandler) || !/status\s*!==\s*['"]PUBLISHED['"]/.test(productLikesHandler)) {
-  failures.push('Dynamic likes must verify that the product is published')
+  failures.push('Every product like must verify that the product is published')
+}
+
+if (/legacyProductSlugs/.test(productLikesHandler)) {
+  failures.push('Product likes must not retain a legacy slug allowlist')
 }
 
 if (!/cognito:groups/.test(manageProductsHandler) || !/includes\(['"]ADMINS['"]\)/.test(manageProductsHandler)) {
@@ -117,8 +122,8 @@ if (!/event\.fieldName\s*\?\?\s*event\.info\?\.fieldName/.test(manageProductsHan
   failures.push('Shared catalog Function must dispatch from Amplify\'s top-level fieldName payload')
 }
 
-if (!/RESERVED_STARTER_SLUGS\.has\(slug\)[\s\S]*input\.action === ['"]ARCHIVE['"][\s\S]*input\.action === ['"]DELETE['"]/.test(manageProductsHandler)) {
-  failures.push('Starter records must resist archive/delete while fixture fallback is active')
+if (/fixtureProducts|mergeCatalog/.test(catalogProvider) || !/setProducts\(managedProducts\)/.test(catalogProvider)) {
+  failures.push('Hosted catalog reads must replace fixtures with the managed GraphQL result')
 }
 
 if (!/FIRST_PARTY_PRODUCT_IMAGE_PATTERN/.test(manageProductsHandler) || !/\/products\//.test(manageProductsHandler)) {

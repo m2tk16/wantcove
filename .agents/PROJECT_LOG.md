@@ -2,6 +2,51 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Managed-catalog Beta acceptance and fixture-removal candidate
+
+### Stage
+
+Hosted phase-one acceptance is complete on Beta commit `3c2d80a` after PR #3 merged and Amplify job 17 completed BUILD, DEPLOY, and VERIFY. Phase-two cleanup is local on `codex/remove-catalog-fixture-fallback`; no cleanup commit, push, deployment, cloud mutation, or Production change has been created.
+
+### Beta acceptance
+
+- The authenticated administrator migration completed once and produced exactly the four expected `PUBLISHED` Product records. The migration panel disappeared, all four managed cards loaded their first-party images, and no affiliate destination was activated.
+- A read-only public GraphQL check returned the same four slugs in featured order with the expected image paths, display prices, and display ratings. The sanitized response contained no Amazon ASIN or retailer URL.
+- Dynamic hosted-browser checks confirmed that the home page and a product-detail route render from the managed records, related-product navigation remains intact, retailer actions remain disabled with disclosure text visible, and the browser console reported no application errors.
+
+### Phase-two cleanup
+
+- Replaced live fixture merging with direct GraphQL catalog replacement. A failed live read clears any initial test data and shows a bounded unavailable message instead of silently restoring code fixtures.
+- Kept initial-product and catalog-gateway injection only as explicit test/story seams; the production app supplies neither and therefore uses the Amplify public catalog as its sole product source.
+- Removed the legacy starter-slug like allowlist. Every like read or mutation now consistently reads the Product table and rejects records that are missing or not `PUBLISHED` before accessing the identity-scoped like table.
+- Removed the temporary starter archive/delete restriction and its `Fallback protected` UI. With no public fixture fallback, migrated records now follow the normal administrator lifecycle; starter slugs remain reserved from ordinary creation so the idempotent migration remains the recovery path for a missing record.
+
+### GraphQL request-loop correction
+
+- Owner testing exposed dozens of repeated GraphQL requests. A cloud-like failure produced a session-only state, but the like loader depended on that state; every update recreated the loader and retriggered every visible Like button.
+- Stabilized the loader around a current-state ref and the intentional privacy/gateway dependencies. Duplicate cards still deduplicate in-flight work, a failed cloud attempt settles once into session-only state, and navigation or a later privacy-choice change can intentionally retry.
+- Added a regression test with two cards for one product and a rejected cloud read; both cards receive the bounded fallback message and the gateway is called exactly once.
+
+### Amazon Associates record
+
+- Recorded the owner-provided public Associate ID `wantcove-20`, Associates Central access, pending post-sale review status, and the notice’s 180-day qualified-referral condition. The notice did not provide an exact enrollment date, so no deadline date was inferred.
+- Did not record the applicant’s personal name or any account credential in this public repository. Associate passwords, verification codes, tax/payment details, and API credentials remain prohibited from source and logs.
+- Rechecked Amazon’s official disclosure help and Operating Agreement. Added the required site identification statement to the global footer and Terms while leaving every retailer action disabled; the existing near-link disclosure remains ready for the separate launch gate.
+
+### Security, data, rollback, and legal review
+
+- Public catalog failure is fail-closed, draft/archived records cannot be liked, actor identity remains server-derived from Cognito, and all existing `ADMINS`, conditional-write, projection, TTL, and affiliate-link boundaries remain intact.
+- The cleanup itself writes no data. The four accepted Beta Product rows remain unchanged. After deployment, archiving removes a record from the public catalog and deleting it makes that reserved slug eligible for deliberate non-overwriting migration recovery.
+- Rollback is a normal reviewed code revert through Beta; no row transformation or destructive cleanup is required. A rollback after an administrator lifecycle change must account for the older fixture behavior before promotion.
+- Catalog and like changes add no personal data, cookie, account, outbound destination, or purchase flow. The newly active Associates enrollment changes the disclosed affiliate relationship, so Terms and the global site statement are updated in this same candidate. Privacy is unchanged because no affiliate link, click tracking, retailer request, or new data flow is enabled. Affiliate and Production legal gates otherwise remain unchanged.
+
+### Verification and next
+
+- Focused routing, catalog-provider, admin, migration, and product-like suites pass all 35 tests. The backend-security invariant now rejects fixture merging and a legacy like allowlist.
+- The required full backend gate passes steering, backend-security and CI-policy invariants, warning-free lint, all 45 tests, the production frontend build, and backend TypeScript validation.
+- The integrated audit step could not reach npm from the workspace sandbox; the identical approved registry audit completed immediately afterward and reported 0 production vulnerabilities.
+- Review the complete diff, commit locally, and request explicit approval before pushing the protected phase-two branch.
+
 ## 2026-08-07 — Starter-migration dispatch correction
 
 ### Stage

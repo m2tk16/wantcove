@@ -8,12 +8,6 @@ import {
 import type { AppSyncIdentity, AppSyncResolverHandler } from 'aws-lambda';
 
 const PRODUCT_LIKE_TTL_SECONDS = 60 * 60 * 24 * 180;
-const legacyProductSlugs = new Set([
-  'levitating-globe-lamp',
-  'adjustable-dumbbell-set',
-  'portable-pizza-oven',
-  'wireless-earbuds',
-]);
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 type ProductLikeArguments = {
@@ -52,19 +46,17 @@ export function createProductLikesHandler(send: SendCommand) {
   return async (event: ProductLikeEvent): Promise<boolean> => {
     const { productSlug, liked } = event.arguments;
     const actorKey = requireActorKey(event.identity);
-    if (!legacyProductSlugs.has(productSlug)) {
-      if (productSlug.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productSlug)) {
-        throw new Error('Unknown product.');
-      }
-      const product = await send(new GetCommand({
-        TableName: requireProductTableName(),
-        Key: { slug: productSlug },
-        ConsistentRead: true,
-        ProjectionExpression: '#status',
-        ExpressionAttributeNames: { '#status': 'status' },
-      }));
-      if (product.Item?.status !== 'PUBLISHED') throw new Error('Unknown product.');
+    if (typeof productSlug !== 'string' || productSlug.length > 80 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(productSlug)) {
+      throw new Error('Unknown product.');
     }
+    const product = await send(new GetCommand({
+      TableName: requireProductTableName(),
+      Key: { slug: productSlug },
+      ConsistentRead: true,
+      ProjectionExpression: '#status',
+      ExpressionAttributeNames: { '#status': 'status' },
+    }));
+    if (product.Item?.status !== 'PUBLISHED') throw new Error('Unknown product.');
 
     const TableName = requireTableName();
     const Key = { productSlug, actorKey };

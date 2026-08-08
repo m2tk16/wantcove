@@ -25,6 +25,17 @@ Update the Privacy Policy before materially changing personal data collection, a
 - Never imply that a retailer sponsors or endorses WantCove without written authorization.
 - If WantCove joins Amazon Associates, add the exact current Amazon-required site identification statement and link-level disclosures before using Amazon Special Links. Do not display that program statement before enrollment is active.
 
+## Amazon Associates enrollment record
+
+Owner-provided notice received 2026-08-07:
+
+- Marketplace: Amazon.com Associates Program.
+- Public Associate/tracking ID: `wantcove-20`. This identifier is intended to appear in Special Links and is not an authentication secret.
+- Status: access to Associates Central is active; Amazon says the application will be reviewed after qualified referred sales. Do not describe the application as finally approved until Associates Central confirms it.
+- Qualification window: the notice says access may be withdrawn if affiliate links do not refer qualified sales within 180 days. The exact enrollment/start date must be confirmed in Associates Central before setting an operational deadline.
+- Repository privacy: do not store the applicant’s personal name, account password, verification code, tax details, payment details, API credentials, or other Associates account secrets.
+- Launch remains blocked until links are Amazon-provided Special Links, the current site statement and link-level disclosures are present, product content follows current Program Content rules, operator/contact/jurisdiction requirements are complete, and qualified review is recorded.
+
 ## Release checklist
 
 1. Compare the release against both trigger lists.
@@ -38,6 +49,6 @@ Update the Privacy Policy before materially changing personal data collection, a
 - FTC Endorsement Guides Q&A: https://consumer.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking
 - FTC privacy and security guidance: https://www.ftc.gov/business-guidance/privacy-security
 - Amazon Associates Operating Agreement: https://affiliate-program.amazon.com/help/operating/agreement
-- Amazon Associates disclosure help: https://affiliate-program.amazon.com/help/node/topic/GPXFHVYZMTGPUMPE
+- Amazon Associates disclosure help: https://affiliate-program.amazon.com/help/node/topic/GHQNZAU6669EZS98
 
 Recheck current program terms and applicable law before activation; references can change.

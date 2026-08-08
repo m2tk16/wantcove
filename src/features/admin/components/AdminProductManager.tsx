@@ -72,8 +72,8 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
           <div><div className="product-admin-meta"><span className={`status-pill status-${product.status.toLowerCase()}`}>{product.status}</span><code>{product.slug}</code></div><h3>{product.name}</h3><p>{product.category} · Updated {new Date(product.updatedAt).toLocaleDateString()}</p></div>
           <div className="admin-product-actions">
             <button disabled={busy} onClick={() => setEditing(product)} type="button">Edit</button>
-            {product.status !== 'PUBLISHED' ? <button disabled={busy} onClick={() => void run(() => catalog.publish(product.slug))} type="button">Publish</button> : STARTER_SLUGS.includes(product.slug) ? null : <button disabled={busy} onClick={() => void run(() => catalog.archive(product.slug))} type="button">Archive</button>}
-            {STARTER_SLUGS.includes(product.slug) ? <span className="status-pill">Fallback protected</span> : deleting === product.slug ? <><button className="danger-button" disabled={busy} onClick={() => void run(() => catalog.remove(product.slug))} type="button">Confirm delete</button><button disabled={busy} onClick={() => setDeleting(undefined)} type="button">Cancel</button></> : <button disabled={busy} onClick={() => setDeleting(product.slug)} type="button">Delete</button>}
+            {product.status !== 'PUBLISHED' ? <button disabled={busy} onClick={() => void run(() => catalog.publish(product.slug))} type="button">Publish</button> : <button disabled={busy} onClick={() => void run(() => catalog.archive(product.slug))} type="button">Archive</button>}
+            {deleting === product.slug ? <><button className="danger-button" disabled={busy} onClick={() => void run(() => catalog.remove(product.slug))} type="button">Confirm delete</button><button disabled={busy} onClick={() => setDeleting(undefined)} type="button">Cancel</button></> : <button disabled={busy} onClick={() => setDeleting(product.slug)} type="button">Delete</button>}
           </div>
         </article>)}
       </div>}

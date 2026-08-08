@@ -27,7 +27,6 @@ describe('parsePublicCatalogPayload', () => {
       price: publishedProduct.priceLabel,
       rating: publishedProduct.ratingLabel,
       featuredRank: publishedProduct.featuredRank,
-      source: 'managed',
     }])
   })
 
