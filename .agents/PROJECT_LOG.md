@@ -2,6 +2,31 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Self-service administrator password recovery Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for merge commit `29aa0cb` from PR #9. Amplify Beta job 23 completed BUILD, DEPLOY, and VERIFY successfully, and the direct `/admin/forgot-password` route returned HTTP 200. This completion record is local on `codex/record-password-recovery-acceptance`; no documentation commit, push, Production branch, or Production resource has been changed.
+
+### Hosted acceptance
+
+- The owner privately requested recovery for the existing administrator account, received the email code, replaced the password, and confirmed that the new password works. No password, recovery code, authenticator code, or session token was shared with the repository, project log, automation, or support conversation.
+- The existing authenticator remained required after recovery, and administrator access continued to depend on the server-issued `ADMINS` group rather than the recovered password alone.
+- Read-only Cognito verification confirmed that `m2tk16@gmail.com` remains enabled, `CONFIRMED`, and email-verified after the recovery lifecycle.
+- The deployed Terms and Privacy routes describe administrative recovery processing, and public self-registration remains disabled.
+
+### Security, data, legal, and rollback review
+
+- Account-neutral request messaging, email-only Cognito recovery, required TOTP, and server-enforced administrator authorization remain intact. The accepted flow did not reveal account eligibility or create an account.
+- Recovery changed only the owner-selected Cognito password. It created no Product, catalog, like, GraphQL, or DynamoDB record and introduced no cookie, affiliate destination, or additional processor.
+- The same-release Terms and Privacy updates now match the hosted behavior. Operator identity, monitored contact, jurisdiction, qualified review, and affiliate launch requirements remain separate Production blockers.
+- Rollback remains a reviewed removal of the route and client integration through Beta. Rolling back the UI does not revert the owner-selected password or weaken the Cognito account.
+
+### Verification and next
+
+- Local release gates before merge passed steering, security and CI invariants, warning-free lint, all 49 tests, the production build, backend TypeScript validation, and a production dependency audit with 0 vulnerabilities. GitHub’s required `Branch policy check` passed before merge.
+- Record this hosted result through the protected documentation PR flow, then continue with the remaining Production-readiness security and legal blockers. Production remains on its earlier known-good deployment.
+
 ## 2026-08-07 — Self-service administrator password recovery candidate
 
 ### Stage
