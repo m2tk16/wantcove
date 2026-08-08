@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import type { AdminProduct, ProductDraft } from '../types'
 
 const emptyDraft: ProductDraft = {
@@ -15,29 +15,29 @@ const emptyDraft: ProductDraft = {
   featuredRank: undefined,
 }
 
+function initialDraft(product?: AdminProduct): ProductDraft {
+  return product ? {
+    slug: product.slug,
+    name: product.name,
+    description: product.description,
+    category: product.category,
+    imageUrl: product.imageUrl,
+    imageAlt: product.imageAlt,
+    priceLabel: product.priceLabel,
+    ratingLabel: product.ratingLabel,
+    amazonAsin: product.amazonAsin,
+    retailerUrl: product.retailerUrl,
+    featuredRank: product.featuredRank,
+  } : emptyDraft
+}
+
 export function ProductEditor({ product, busy, onCancel, onSave }: {
   product?: AdminProduct
   busy: boolean
   onCancel(): void
   onSave(product: ProductDraft): Promise<boolean>
 }) {
-  const [draft, setDraft] = useState<ProductDraft>(emptyDraft)
-
-  useEffect(() => {
-    setDraft(product ? {
-      slug: product.slug,
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      imageUrl: product.imageUrl,
-      imageAlt: product.imageAlt,
-      priceLabel: product.priceLabel,
-      ratingLabel: product.ratingLabel,
-      amazonAsin: product.amazonAsin,
-      retailerUrl: product.retailerUrl,
-      featuredRank: product.featuredRank,
-    } : emptyDraft)
-  }, [product])
+  const [draft, setDraft] = useState<ProductDraft>(() => initialDraft(product))
 
   function update<K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))

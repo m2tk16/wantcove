@@ -61,7 +61,7 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
   const missingStarterCount = STARTER_SLUGS.filter((slug) => !managedSlugs.has(slug)).length
 
   return <div className="admin-manager">
-    <ProductEditor busy={busy} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
+    <ProductEditor busy={busy} key={editing?.slug ?? 'new-product'} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
     <section className="admin-product-list" aria-labelledby="managed-products-heading">
       <div className="admin-section-heading"><div><span className="kicker">GraphQL catalog</span><h2 id="managed-products-heading">Managed products</h2></div><button className="text-button" disabled={loading || busy} onClick={() => void refresh()} type="button">Refresh</button></div>
       {error ? <p className="form-error" role="alert">{error}</p> : null}
