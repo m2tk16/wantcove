@@ -2,6 +2,24 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Product deep-link loading-state candidate
+
+### Stage
+
+Local UI bug-fix candidate on `codex/fix-product-deep-link-loading`, based on accepted Beta merge commit `d3cce54` from PR #15 and successful Amplify Beta job 30. No commit, push, pull request, Beta deployment, `main` change, Production deployment, backend resource, Product record, or like record has been created or changed by this candidate.
+
+### Observed and updated
+
+- Hosted post-deployment smoke testing opened `/products/levitating-globe-lamp` directly and observed the real 404 experience for about two seconds while the public GraphQL catalog was still loading. The valid product then replaced it without navigation, proving the route had conflated a pending catalog with a genuinely missing product.
+- Product routing now renders an accessible busy status while the catalog request is pending, renders the existing bounded catalog-availability message when GraphQL fails, and renders the 404 experience only after a successful completed lookup does not contain the requested slug.
+- Kept the state handling inside the catalog feature and reused the existing provider contract; no route-level fetch, duplicate data client, fixture fallback, or timer was added.
+
+### Security, privacy, rollback, and verification
+
+- The change is presentation-only and does not alter authorization, GraphQL operations, Cognito identities, cookies, stored preferences, affiliate destinations, Terms, or Privacy behavior. It exposes no catalog field that was not already public.
+- Rollback is a reviewed restoration of the previous product-route fallback, but that would intentionally restore the misleading transient 404.
+- A regression test first reproduced the false 404. Focused routing coverage now passes 12 tests for pending success, catalog failure, genuine missing products, existing disclosures, navigation, privacy choices, theme behavior, and synchronized likes. The normal fast gate passed steering, security, CI and hosting invariants, warning-free lint, and all 70 tests; the production build also passed. Hosted rendered acceptance remains pending a protected Beta deployment because branch Amplify outputs are intentionally absent from the local app.
+
 ## 2026-08-08 — Anonymous-like abuse protection candidate
 
 ### Stage
