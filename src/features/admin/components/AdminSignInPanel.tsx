@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from '../../../shared/navigation/Link'
 import type { AdminAuthGateway, AdminAuthStep } from '../types'
 
 type Props = {
@@ -85,5 +86,6 @@ export function AdminSignInPanel({ auth, challenge, busy, error, onStep, onError
     {!auth.isAvailable ? <p className="form-warning" role="status">This local build has no Amplify configuration. Deploy the backend and provide branch outputs before signing in.</p> : null}
     {error ? <p className="form-error" role="alert">{error}</p> : null}
     <button className="button" disabled={busy || !auth.isAvailable} type="submit">{busy ? 'Signing in…' : 'Sign in securely'}</button>
+    <div className="admin-auth-secondary-actions"><Link to="/admin/forgot-password">Forgot password?</Link></div>
   </form>
 }

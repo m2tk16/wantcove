@@ -2,6 +2,32 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Self-service administrator password recovery candidate
+
+### Stage
+
+Local authentication candidate on `codex/admin-password-recovery`, based on accepted Beta commit `a31033c`. No commit, push, Cognito account change, recovery message, Beta deployment, Production branch, or Production resource has been created.
+
+### Updated
+
+- Added the footer-hidden `/admin/forgot-password` route and linked it only from the restricted administrator sign-in panel.
+- Kept the feature modular: the page and recovery state live in the admin feature while a thin typed service calls Amplify Auth `resetPassword` and `confirmResetPassword`.
+- Every initial and repeated recovery request shows the same account-neutral response even when Cognito rejects the request, preventing the page from confirming whether an email belongs to an eligible, disabled, throttled, or unknown account.
+- Confirmation requires a six-digit code, a password of at least twelve characters, and matching password fields. Successful recovery clears the code and password fields before rendering completion.
+
+### Security, data, legal, and rollback review
+
+- The existing backend remains admin-create-only with email-only account recovery, required TOTP MFA, and server-issued `ADMINS` group authorization. Resetting a password does not enroll a user, remove MFA, grant group membership, or authorize a catalog mutation.
+- Recovery codes and replacement passwords are sent directly to Amazon Cognito through Amplify Auth. WantCove does not write them to browser storage, application logs, GraphQL, DynamoDB, or catalog records.
+- No backend resource, schema, data migration, cookie, affiliate link, or third-party processor is added. The Terms account section and Privacy authentication, purpose, retention, and security disclosures were updated for the real recovery flow; the same-day August 7 updated date remains accurate.
+- Rollback is a reviewed removal of the route, sign-in link, and client adapter. Existing Cognito email-only recovery configuration and administrator accounts remain unchanged.
+
+### Tests and next
+
+- Added focused regressions for account-neutral rejected requests, matching-password confirmation, secret-field removal after success, mismatch rejection before Cognito, route privacy, and the email-only backend invariant.
+- The complete authentication-change gate passes: steering, backend-security and CI invariants; warning-free lint; all 49 tests; the production frontend build; and backend TypeScript validation. The integrated audit could not reach npm from the workspace sandbox; the identical network-enabled production audit completed immediately afterward with 0 vulnerabilities.
+- Review the complete diff and request explicit commit approval. After protected Beta deployment, verify real code delivery and password replacement privately without exposing the email code or password, then confirm MFA and `ADMINS` sign-in still succeed.
+
 ## 2026-08-07 — Authenticated administrator likes Beta acceptance
 
 ### Stage

@@ -18,6 +18,12 @@ export type AdminAuthGateway = {
   signOut(): Promise<void>
 }
 
+export type AdminPasswordRecoveryGateway = {
+  isAvailable: boolean
+  request(email: string): Promise<void>
+  confirm(email: string, confirmationCode: string, newPassword: string): Promise<void>
+}
+
 export type ProductStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 
 export type AdminProduct = {

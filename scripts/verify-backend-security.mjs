@@ -78,6 +78,7 @@ const backendRequirements = [
 const authRequirements = [
   ['The ADMINS Cognito group must exist', /groups\s*:\s*\[['"]ADMINS['"]\]/],
   ['Administrator MFA must be required', /multifactor\s*:\s*\{[\s\S]*mode\s*:\s*['"]REQUIRED['"][\s\S]*totp\s*:\s*true/],
+  ['Administrator recovery must remain email-only', /accountRecovery\s*:\s*['"]EMAIL_ONLY['"]/],
 ]
 
 const failures = requirements
