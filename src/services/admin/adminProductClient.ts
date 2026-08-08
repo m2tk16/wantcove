@@ -38,6 +38,8 @@ function parseProduct(value: unknown): AdminProduct | null {
     category: record.category,
     imageUrl: record.imageUrl,
     imageAlt: record.imageAlt,
+    priceLabel: typeof record.priceLabel === 'string' ? record.priceLabel : undefined,
+    ratingLabel: typeof record.ratingLabel === 'string' ? record.ratingLabel : undefined,
     amazonAsin: typeof record.amazonAsin === 'string' ? record.amazonAsin : undefined,
     retailerUrl: typeof record.retailerUrl === 'string' ? record.retailerUrl : undefined,
     featuredRank: typeof record.featuredRank === 'number' ? record.featuredRank : undefined,
@@ -56,6 +58,8 @@ function operationInput(product: ProductDraft) {
     category: product.category,
     imageUrl: product.imageUrl,
     imageAlt: product.imageAlt,
+    priceLabel: product.priceLabel,
+    ratingLabel: product.ratingLabel,
     amazonAsin: product.amazonAsin,
     retailerUrl: product.retailerUrl,
     featuredRank: product.featuredRank,
@@ -82,6 +86,10 @@ export const adminProductClient: AdminProductGateway = {
   },
   async update(product) {
     const { errors } = await requireClient().mutations.manageProduct({ action: 'UPDATE', ...operationInput(product) })
+    if (errors?.length) throw new Error(errors[0].message)
+  },
+  async migrateStarters() {
+    const { errors } = await requireClient().mutations.migrateStarterProducts()
     if (errors?.length) throw new Error(errors[0].message)
   },
   publish: (slug) => manage('PUBLISH', slug),

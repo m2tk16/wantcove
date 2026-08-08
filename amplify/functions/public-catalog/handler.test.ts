@@ -10,7 +10,7 @@ describe('public-catalog Function', () => {
   it('returns only published products in featured order', async () => {
     const send = vi.fn().mockResolvedValue({
       Items: [
-        { slug: 'second', name: 'Second', status: 'PUBLISHED', featuredRank: 2 },
+        { slug: 'second', name: 'Second', status: 'PUBLISHED', featuredRank: 2, priceLabel: '$29.99', ratingLabel: '4.6' },
         { slug: 'hidden', name: 'Hidden', status: 'DRAFT', featuredRank: 1 },
         { slug: 'first', name: 'First', status: 'PUBLISHED', featuredRank: 1 },
       ],
@@ -19,7 +19,7 @@ describe('public-catalog Function', () => {
 
     await expect(handler({ arguments: {} })).resolves.toEqual([
       expect.objectContaining({ slug: 'first' }),
-      expect.objectContaining({ slug: 'second' }),
+      expect.objectContaining({ slug: 'second', priceLabel: '$29.99', ratingLabel: '4.6' }),
     ]);
     expect(send.mock.calls[0][0]).toBeInstanceOf(ScanCommand);
     expect(send.mock.calls[0][0].input.FilterExpression).toBe('#status = :published');

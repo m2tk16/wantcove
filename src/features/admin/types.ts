@@ -27,6 +27,8 @@ export type AdminProduct = {
   category: string
   imageUrl: string
   imageAlt: string
+  priceLabel?: string
+  ratingLabel?: string
   amazonAsin?: string
   retailerUrl?: string
   featuredRank?: number
@@ -42,6 +44,7 @@ export type AdminProductGateway = {
   list(): Promise<AdminProduct[]>
   create(product: ProductDraft): Promise<void>
   update(product: ProductDraft): Promise<void>
+  migrateStarters(): Promise<void>
   publish(slug: string): Promise<void>
   archive(slug: string): Promise<void>
   remove(slug: string): Promise<void>

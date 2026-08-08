@@ -34,6 +34,7 @@ function catalog(products: AdminProduct[] = []): AdminProductGateway {
     list: vi.fn().mockResolvedValue(products),
     create: vi.fn().mockResolvedValue(undefined),
     update: vi.fn().mockResolvedValue(undefined),
+    migrateStarters: vi.fn().mockResolvedValue(undefined),
     publish: vi.fn().mockResolvedValue(undefined),
     archive: vi.fn().mockResolvedValue(undefined),
     remove: vi.fn().mockResolvedValue(undefined),
@@ -85,7 +86,7 @@ describe('AdminPage', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: product.name } })
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: product.category } })
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: product.description } })
-    fireEvent.change(screen.getByLabelText('Image URL'), { target: { value: product.imageUrl } })
+    fireEvent.change(screen.getByLabelText('Image location'), { target: { value: product.imageUrl } })
     fireEvent.change(screen.getByLabelText('Image alt text'), { target: { value: product.imageAlt } })
     fireEvent.click(screen.getByRole('button', { name: 'Create draft' }))
 
@@ -94,6 +95,26 @@ describe('AdminPage', () => {
       name: product.name,
     })))
     expect(screen.queryByLabelText('Status')).not.toBeInTheDocument()
+  })
+
+  it('offers the guarded starter migration and refreshes the catalog after it completes', async () => {
+    const productCatalog = catalog()
+    render(<AdminPage auth={adminAuth()} catalog={productCatalog} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Migrate starter catalog' }))
+
+    await waitFor(() => expect(productCatalog.migrateStarters).toHaveBeenCalledOnce())
+    expect(productCatalog.list).toHaveBeenCalledTimes(2)
+    expect(screen.getByText(/Existing records will never be overwritten/)).toBeInTheDocument()
+  })
+
+  it('protects migrated starters from destructive lifecycle actions while fallback is active', async () => {
+    const starter = { ...product, slug: 'levitating-globe-lamp', status: 'PUBLISHED' as const }
+    render(<AdminPage auth={adminAuth()} catalog={catalog([starter])} />)
+
+    expect(await screen.findByText('Fallback protected')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Archive' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
   })
 
   it('exposes edit, publish, and guarded delete actions to an authorized admin', async () => {

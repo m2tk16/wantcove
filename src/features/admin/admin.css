@@ -167,6 +167,34 @@
   font-size: .75rem;
 }
 
+.starter-migration-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 22px;
+  padding: 18px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.starter-migration-panel h3,
+.starter-migration-panel p {
+  margin: 0;
+}
+
+.starter-migration-panel p {
+  margin-top: 5px;
+  color: var(--text-subtle);
+  font-size: .75rem;
+  line-height: 1.5;
+}
+
+.starter-migration-panel .button {
+  flex: 0 0 auto;
+}
+
 .admin-product-cards {
   display: grid;
   gap: 12px;
@@ -259,7 +287,8 @@
 @media (max-width: 760px) {
   .admin-page { width: min(100% - 28px, 1180px); padding-top: 38px; }
   .admin-page-header,
-  .admin-session-banner { flex-direction: column; }
+  .admin-session-banner,
+  .starter-migration-panel { flex-direction: column; align-items: stretch; }
   .form-grid { grid-template-columns: 1fr; }
   .wide-field { grid-column: auto; }
   .admin-product-card { grid-template-columns: 68px minmax(0, 1fr); }

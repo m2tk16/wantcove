@@ -12,8 +12,10 @@ const schema = a.schema({
       name: a.string().required(),
       description: a.string().required(),
       category: a.string().required(),
-      imageUrl: a.url().required(),
+      imageUrl: a.string().required(),
       imageAlt: a.string().required(),
+      priceLabel: a.string(),
+      ratingLabel: a.string(),
       amazonAsin: a.string(),
       retailerUrl: a.url(),
       status: a.ref('ProductStatus').required(),
@@ -50,12 +52,19 @@ const schema = a.schema({
       name: a.string(),
       description: a.string(),
       category: a.string(),
-      imageUrl: a.url(),
+      imageUrl: a.string(),
       imageAlt: a.string(),
+      priceLabel: a.string(),
+      ratingLabel: a.string(),
       amazonAsin: a.string(),
       retailerUrl: a.url(),
       featuredRank: a.integer(),
     })
+    .returns(a.json().required())
+    .authorization((allow) => [allow.group('ADMINS')])
+    .handler(a.handler.function(manageProductsFunction)),
+  migrateStarterProducts: a
+    .mutation()
     .returns(a.json().required())
     .authorization((allow) => [allow.group('ADMINS')])
     .handler(a.handler.function(manageProductsFunction)),

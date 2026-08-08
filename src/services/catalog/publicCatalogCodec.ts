@@ -21,6 +21,8 @@ function parseProduct(value: unknown): Product | null {
     category,
     image,
     imageAlt: readString(record, 'imageAlt') ?? name,
+    price: readString(record, 'priceLabel'),
+    rating: readString(record, 'ratingLabel'),
     featuredRank: typeof record.featuredRank === 'number' ? record.featuredRank : undefined,
     source: 'managed',
   }

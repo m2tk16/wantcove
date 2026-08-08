@@ -8,6 +8,8 @@ const publishedProduct = {
   category: 'Home',
   imageUrl: 'https://images.example.com/reading-light.jpg',
   imageAlt: 'Black reading light on a wooden desk',
+  priceLabel: '$49.99',
+  ratingLabel: '4.8',
   featuredRank: 4,
   amazonAsin: 'B012345678',
   retailerUrl: 'https://www.amazon.com/dp/B012345678',
@@ -22,6 +24,8 @@ describe('parsePublicCatalogPayload', () => {
       category: publishedProduct.category,
       image: publishedProduct.imageUrl,
       imageAlt: publishedProduct.imageAlt,
+      price: publishedProduct.priceLabel,
+      rating: publishedProduct.ratingLabel,
       featuredRank: publishedProduct.featuredRank,
       source: 'managed',
     }])
