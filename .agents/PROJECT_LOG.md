@@ -2,6 +2,28 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Hosting and first-party media hardening Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for PR #13 merge commit `dddc5c3`. Amplify Beta job 27 completed BUILD, DEPLOY, and VERIFY, but acceptance correctly rejected that first deployment because the app-level SPA rewrite treated `.avif` requests as routes and returned `index.html`. The existing domain redirect was preserved exactly, `avif` was added to the static-file extension allowlist with owner approval, and retry job 28 then completed all three stages successfully against the same merge commit.
+
+### Hosted acceptance
+
+- The Beta origin serves all 24 responsive assets: 12 AVIF and 12 WebP files totaling 765,050 bytes. Each returned HTTP 200, the correct `image/avif` or `image/webp` media type, and the intended one-week product-media cache policy.
+- A fresh cache-busted AVIF request decoded successfully in the browser at its expected 960×640 intrinsic dimensions. The acceptance browser had cached the initial incorrect HTML response under the unversioned AVIF URL, so its existing tab required the cache-busted check; users who loaded Beta during the brief failed-acceptance window may need a hard refresh.
+- The deployed HSTS, deny-by-default Content Security Policy, MIME and framing protections, referrer and permissions policies, and cross-origin headers matched the repository policy. No unrestricted external image or script source was introduced.
+- The public GraphQL catalog loaded all four published products and anonymous like state. The existing MFA-protected `ADMINS` session loaded all four managed products without a mutation, and the administrator form states the first-party `/products/` requirement.
+- The hosted Privacy Policy displays its August 8 update and accurately describes first-party product-media hosting plus rejection of arbitrary external image hosts. Public catalog, administrator, and Privacy checks produced no browser warning or error.
+- The browser viewport override did not bind to the reopened hosted-test tabs, so hosted mobile acceptance was not claimed. The same built UI had already passed the local 390×844 responsive check without horizontal overflow before PR #13.
+
+### Cloud scope, rollback, and next
+
+- The approved Amplify `customRules` update is app-level and therefore shared by Beta and `main`; it changed only recognition of the `.avif` static-file extension. No Production branch build, Production deployment, backend resource, authorization rule, Cognito user, Product record, like record, GraphQL or DynamoDB data, cookie behavior, affiliate destination, or secret changed.
+- Beta rollback is redeployment of previously accepted job 26 commit `2ecf6c9`. The prior SPA rewrite must be restored only together with removal of AVIF references; restoring it alone would recreate broken product images.
+- Production remains blocked by the recorded legal identity, verified monitored contact, jurisdiction, and qualified-review requirements. Retailer links remain disabled.
+- Future product-image replacements should use content-versioned names before long-lived caching is increased, preventing an earlier response from remaining in a client cache after media content changes.
+
 ## 2026-08-08 — Hosting and first-party media hardening candidate
 
 ### Stage
