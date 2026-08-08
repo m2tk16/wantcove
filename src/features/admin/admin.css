@@ -94,6 +94,24 @@
   margin-top: 22px;
 }
 
+.admin-auth-secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 18px;
+  font-size: .78rem;
+}
+
+.admin-auth-secondary-actions a {
+  color: var(--text);
+  font-weight: 750;
+}
+
+.admin-auth-secondary-actions .text-button {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .form-warning,
 .form-error {
   padding: 11px 13px;

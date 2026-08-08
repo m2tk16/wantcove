@@ -1,4 +1,5 @@
 import { AdminPage } from '../features/admin/pages/AdminPage'
+import { AdminPasswordRecoveryPage } from '../features/admin/pages/AdminPasswordRecoveryPage'
 import { CategoriesPage } from '../features/catalog/pages/CategoriesPage'
 import { CatalogListing, ProductRoute } from '../features/catalog/pages/CatalogRoutes'
 import { HomePage } from '../features/catalog/pages/HomePage'
@@ -16,6 +17,7 @@ export function resolveRoute(path: string) {
     case '/top-picks': return <CatalogListing title="Top picks" intro="The finds people keep coming back to." mode="all" />
     case '/deals': return <CatalogListing title="Deals worth seeing" intro="Useful things at prices worth a second look." mode="deals" />
     case '/admin': return <AdminPage />
+    case '/admin/forgot-password': return <AdminPasswordRecoveryPage />
     case '/terms': return <TermsPage />
     case '/privacy': return <PrivacyPage />
     default: return <NotFoundPage />

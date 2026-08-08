@@ -101,10 +101,17 @@ describe('WantCove discovery routes', () => {
   })
 
   it('keeps the admin route out of public navigation and closed without backend configuration', async () => {
-    renderAt('/admin')
+    const view = renderAt('/admin')
     expect(await screen.findByRole('heading', { name: 'Admin sign in' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign in securely' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/admin/forgot-password')
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/admin"]')).toBeNull()
+    view.unmount()
+
+    renderAt('/admin/forgot-password')
+    expect(screen.getByRole('heading', { name: 'Administrator recovery' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Send recovery code' })).toBeDisabled()
+    expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/admin/forgot-password"]')).toBeNull()
   })
 
   it('keeps Terms and Privacy available from the footer without primary navigation links', () => {
@@ -112,6 +119,7 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByRole('heading', { name: 'Terms of Service' })).toBeInTheDocument()
     expect(screen.getAllByText('As an Amazon Associate I earn from qualifying purchases.')).toHaveLength(2)
     expect(screen.getByText(/affiliate or referral code/i)).toBeInTheDocument()
+    expect(screen.getByText(/Password recovery does not remove MFA/i)).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Legal' })).toBeInTheDocument()
     view.unmount()
 
@@ -122,6 +130,7 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/does not send WantCove a raw IP address/i)).toBeInTheDocument()
     expect(screen.getByText(/Public user registration is disabled/i)).toBeInTheDocument()
     expect(screen.getByText(/time-based one-time-password multifactor authentication/i)).toBeInTheDocument()
+    expect(screen.getByText(/short-lived recovery codes and replacement passwords/i)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/privacy"]')).toBeNull()
   })
 
