@@ -44,22 +44,24 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
       setEditing(undefined)
       setDeleting(undefined)
       await refresh()
+      return true
     } catch (caught) {
       setError(errorMessage(caught))
+      return false
     } finally {
       setBusy(false)
     }
   }
 
   async function save(product: ProductDraft) {
-    await run(() => editing ? catalog.update(product) : catalog.create(product))
+    return run(() => editing ? catalog.update(product) : catalog.create(product))
   }
 
   const managedSlugs = new Set(products.map(({ slug }) => slug))
   const missingStarterCount = STARTER_SLUGS.filter((slug) => !managedSlugs.has(slug)).length
 
   return <div className="admin-manager">
-    <ProductEditor busy={busy} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
+    <ProductEditor busy={busy} key={editing?.slug ?? 'new-product'} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
     <section className="admin-product-list" aria-labelledby="managed-products-heading">
       <div className="admin-section-heading"><div><span className="kicker">GraphQL catalog</span><h2 id="managed-products-heading">Managed products</h2></div><button className="text-button" disabled={loading || busy} onClick={() => void refresh()} type="button">Refresh</button></div>
       {error ? <p className="form-error" role="alert">{error}</p> : null}

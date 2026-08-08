@@ -2,6 +2,27 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Admin draft failure-retention candidate
+
+### Stage
+
+Local UI bug-fix candidate on `codex/preserve-admin-product-form`, based on accepted Beta commit `ece5f7a` from PR #17 and successful Amplify Beta job 32. No commit, push, pull request, Beta deployment, backend change, Product mutation, image upload, `main` change, or Production deployment has been made.
+
+### Observed and updated
+
+- A rejected product creation cleared every new-product field because the catalog manager caught the GraphQL error and resolved the editor's save promise as though the mutation had succeeded.
+- Catalog operations now return an explicit success result. The new-product editor resets only after a successful creation and preserves the complete controlled draft after a rejected request so the administrator can correct one field and retry.
+- The first protected PR check exposed a slower-runner timing race in the pre-existing prop-synchronization effect: it could clear the required slug immediately after entry and prevent native form submission. The editor now initializes directly from its mode, while the manager uses a stable mode/product key to reset only when intentionally switching between a new draft and a specific product.
+- Renamed the image field to `Deployed image path` and added direct guidance that it references an image already deployed under `public/products`; it is not a browser upload control. Local Windows paths and files under `src/assets` are not reachable from the hosted site by path.
+- Preserved the first-party media allowlist. Safe values remain lowercase `/products/` URLs with an AVIF, JPEG, PNG, or WebP extension; the local `lasfit_floor_mats.JPG` source remains an untracked owner file and was not moved, converted, uploaded, or exposed.
+
+### Security, privacy, rollback, and verification
+
+- The fix does not broaden media hosts, mutate Product data, change authorization, inspect local file contents, add a cookie, activate a retailer destination, or change personal-data processing. Terms and Privacy behavior remain unchanged.
+- Actual administrator image upload is logged separately because it requires an explicit storage, validation, naming, lifecycle, authorization, CSP, and privacy design rather than treating a local filesystem path as a public URL.
+- Rollback is a reviewed restoration of the prior save-result contract and image-field copy; that rollback would intentionally restore destructive form clearing after backend errors.
+- Focused administrator coverage passed five consecutive runs of all 7 tests, including a 68-second cold-start run that exercised the slower-runner condition. The initial PR #18 check failed only the successful-create test when the mount effect cleared its slug; all other gates and the new failure-retention regression passed. The first corrected fast gate then hit the previously observed unrelated five-second CDK synthesis timeout; that infrastructure test passed immediately in isolation, and the repeated complete fast gate passed steering, security, CI and hosting invariants, warning-free lint, and all 71 tests.
+
 ## 2026-08-08 — Product deep-link loading-state Beta acceptance
 
 ### Stage

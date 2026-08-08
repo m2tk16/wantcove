@@ -86,7 +86,7 @@ describe('AdminPage', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: product.name } })
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: product.category } })
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: product.description } })
-    fireEvent.change(screen.getByLabelText('Image location'), { target: { value: product.imageUrl } })
+    fireEvent.change(screen.getByLabelText('Deployed image path'), { target: { value: product.imageUrl } })
     fireEvent.change(screen.getByLabelText('Image alt text'), { target: { value: product.imageAlt } })
     fireEvent.click(screen.getByRole('button', { name: 'Create draft' }))
 
@@ -94,9 +94,38 @@ describe('AdminPage', () => {
       slug: product.slug,
       name: product.name,
     })))
+    await waitFor(() => expect(screen.getByLabelText('Slug')).toHaveValue(''))
     expect(screen.queryByLabelText('Status')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Image location')).toHaveAttribute('pattern', expect.stringContaining('/products/'))
-    expect(screen.getByText(/Product images must use a first-party \/products\//)).toBeInTheDocument()
+    expect(screen.getByLabelText('Deployed image path')).toHaveAttribute('pattern', expect.stringContaining('/products/'))
+    expect(screen.getByText(/does not upload a file/)).toBeInTheDocument()
+  })
+
+  it('retains every draft field when creation fails', async () => {
+    const productCatalog = catalog()
+    productCatalog.create = vi.fn().mockRejectedValue(new Error('Image location must use a safe first-party /products/ image path.'))
+    render(<AdminPage auth={adminAuth()} catalog={productCatalog} />)
+
+    fireEvent.change(await screen.findByLabelText('Slug'), { target: { value: product.slug } })
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: product.name } })
+    fireEvent.change(screen.getByLabelText('Category'), { target: { value: product.category } })
+    fireEvent.change(screen.getByLabelText('Featured rank'), { target: { value: String(product.featuredRank) } })
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: product.description } })
+    fireEvent.change(screen.getByLabelText('Deployed image path'), { target: { value: product.imageUrl } })
+    fireEvent.change(screen.getByLabelText('Image alt text'), { target: { value: product.imageAlt } })
+    fireEvent.change(screen.getByLabelText('Amazon ASIN'), { target: { value: product.amazonAsin } })
+    fireEvent.change(screen.getByLabelText('Amazon URL'), { target: { value: product.retailerUrl } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create draft' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Image location must use a safe first-party /products/ image path.')
+    expect(screen.getByLabelText('Slug')).toHaveValue(product.slug)
+    expect(screen.getByLabelText('Name')).toHaveValue(product.name)
+    expect(screen.getByLabelText('Category')).toHaveValue(product.category)
+    expect(screen.getByLabelText('Featured rank')).toHaveValue(product.featuredRank)
+    expect(screen.getByLabelText('Description')).toHaveValue(product.description)
+    expect(screen.getByLabelText('Deployed image path')).toHaveValue(product.imageUrl)
+    expect(screen.getByLabelText('Image alt text')).toHaveValue(product.imageAlt)
+    expect(screen.getByLabelText('Amazon ASIN')).toHaveValue(product.amazonAsin)
+    expect(screen.getByLabelText('Amazon URL')).toHaveValue(product.retailerUrl)
   })
 
   it('offers the guarded starter migration and refreshes the catalog after it completes', async () => {
