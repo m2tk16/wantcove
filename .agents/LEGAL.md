@@ -36,13 +36,24 @@ Owner-provided notice received 2026-08-07:
 - Repository privacy: do not store the applicant’s personal name, account password, verification code, tax details, payment details, API credentials, or other Associates account secrets.
 - Launch remains blocked until links are Amazon-provided Special Links, the current site statement and link-level disclosures are present, product content follows current Program Content rules, operator/contact/jurisdiction requirements are complete, and qualified review is recorded.
 
+## Production-readiness record
+
+Owner-provided facts recorded 2026-08-07:
+
+- Public operator/brand name: `WantCove`. The legal entity or individual identity behind that name has not been reviewed, so this is not a completed legal-identity record.
+- Location: Tennessee, United States. Applicable Tennessee and United States requirements, governing-law language, privacy rights, and dispute terms have not received jurisdiction-specific review.
+- Planned public contact: `wantcove@gmail.com`. The owner has not created or confirmed availability of this mailbox. It is not verified, not recorded as monitored, and must not be published as an active contact method until those facts change.
+- Qualified legal review: not started.
+- Release status: Production and commercial affiliate links remain blocked. `.agents/PRODUCTION_READINESS.json` is the machine-readable source for this status, and `npm run verify:release` must fail until the required reviews and contact verification are truthfully complete.
+
 ## Release checklist
 
 1. Compare the release against both trigger lists.
 2. Confirm the policies describe actual behavior and vendors, not planned or assumed behavior.
 3. Update dates, policies, tests, and the project log together.
-4. Record operator identity, monitored contact channel, governing jurisdiction, and counsel review before Beta enables accounts or commercial links.
+4. Record operator identity, monitored contact channel, governing jurisdiction, and counsel review before Production or commercial links.
 5. Block Production when required legal details, consent flows, disclosures, or jurisdiction-specific notices are incomplete.
+6. Keep `.agents/PRODUCTION_READINESS.json` aligned with verified facts and run `npm run verify:release`; never mark a field complete based on a planned value or assumption.
 
 ## Authoritative references reviewed 2026-08-06
 

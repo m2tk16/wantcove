@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "operator": {
+    "publicName": "WantCove",
+    "legalIdentityStatus": "unverified"
+  },
+  "contact": {
+    "plannedEmail": "wantcove@gmail.com",
+    "verified": false,
+    "monitored": false
+  },
+  "jurisdiction": {
+    "country": "United States",
+    "region": "Tennessee",
+    "reviewStatus": "not_started"
+  },
+  "qualifiedLegalReview": {
+    "status": "not_started",
+    "completedAt": null
+  },
+  "affiliateLaunch": {
+    "approved": false,
+    "linksEnabled": false
+  }
+}

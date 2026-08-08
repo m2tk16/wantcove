@@ -16,6 +16,7 @@ Personal `ampx sandbox` environments are disposable developer tooling and are no
 - `main` and `beta` must both be protected and require CI.
 - Amplify branch auto-detection should be limited to `beta` and `main`; do not deploy every feature branch.
 - Production deploys only from `main` after beta acceptance and `npm run check:full`.
+- Production pull requests must pass `npm run verify:release`; planned or unverified legal/contact details keep the branch blocked.
 - Beta and production must not share databases, Cognito pools, storage buckets, secrets, or generated output files.
 - Use separate stage-specific secrets in Amplify. Never copy production secrets into beta.
 - Roll back by redeploying the last known-good commit; do not repair production manually.

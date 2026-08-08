@@ -56,3 +56,5 @@ Within a tier, prefer prerequisites, risk reduction, and smaller reversible chan
 ## Release rule
 
 A release is ready only when the project log names the scope, `npm run check:full` passes, migrations/data impact are reviewed, Terms/Privacy triggers are cleared, rollback is understood, and hosted smoke checks are recorded.
+
+A pull request targeting `main` must also pass `npm run verify:release`. That gate reads `.agents/PRODUCTION_READINESS.json` and must fail closed while the operator identity, monitored contact, jurisdiction review, or qualified legal review is incomplete. Do not bypass or mark a field complete based on an assumption.
