@@ -5,4 +5,8 @@ export const productLikesFunction = defineFunction({
   entry: './handler.ts',
   resourceGroupName: 'data',
   timeoutSeconds: 10,
+  logging: {
+    format: 'text',
+    retention: '1 month',
+  },
 });

@@ -5,6 +5,7 @@ import { data } from './data/resource';
 import { manageProductsFunction } from './functions/manage-products/resource';
 import { publicCatalogFunction } from './functions/public-catalog/resource';
 import { productLikesFunction } from './functions/product-likes/resource';
+import { attachProductLikeAbuseControls } from './monitoring/product-like-abuse-controls';
 import { attachAdminProductLikesPolicy } from './policies/admin-product-likes';
 
 /**
@@ -28,6 +29,8 @@ const productTable = backend.data.resources.tables['Product'];
 const manageProductsLambda = backend.manageProductsFunction.resources.lambda;
 const publicCatalogLambda = backend.publicCatalogFunction.resources.lambda;
 const productLikesLambda = backend.productLikesFunction.resources.lambda;
+
+attachProductLikeAbuseControls(backend.data.stack, productLikesLambda);
 
 productTable.grantReadWriteData(manageProductsLambda);
 productTable.grantReadData(publicCatalogLambda);

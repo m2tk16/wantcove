@@ -2,6 +2,26 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Anonymous-like abuse protection candidate
+
+### Stage
+
+Local backend candidate on `codex/harden-anonymous-likes`, based on accepted Beta commit `91e84f9`. No commit, push, pull request, Beta deployment, AWS resource mutation, Product or like-record mutation, `main` change, or Production deployment has been made.
+
+### Security, privacy, and behavior
+
+- Added a DynamoDB conditional fixed-window control allowing at most 60 valid or malformed like reads or writes per server-derived Cognito identity per minute. Its counter runs before product-input lookup, is set to expire about 10 minutes after use, and does not use a raw IP address or client-supplied actor key.
+- Made like and unlike mutations idempotent with conditional writes. Repeating an active like is a successful no-op and no longer extends its 180-day retention; repeating an unlike is also a successful no-op.
+- Capped the product-like Function at 10 concurrent executions, bounded its CloudWatch log retention to one month, and added alarms for any rate-limited request or Lambda throttle. The custom metric contains only an aggregate count and timestamp, with no identity, product, or IP dimension.
+- Disabled each cloud like control while its read or write is in flight, preventing rapid repeat clicks from dispatching overlapping mutations. Server enforcement remains authoritative.
+- Updated the Privacy Policy for the short-lived pseudonymous counter, aggregate monitoring, exact retention behavior, and new safeguards. The Terms already prohibit manipulating likes or creating identities to evade safeguards, so its behavior and date are unchanged.
+
+### Limits, rollback, and verification
+
+- Clearing browser storage can still obtain a new Cognito guest identity. This slice limits accidental loops and ordinary per-identity abuse but does not claim to stop hostile identity churn. AppSync AWS WAF rate limiting is logged separately for an explicit recurring-cost, IP-processing, logging, scope, and false-positive decision before broad public promotion or aggregate like counts.
+- Rollback is a reviewed restoration of the prior handler, Function resource, backend wiring, like-provider behavior, Privacy wording, and removal of the monitoring resources. Existing like rows remain compatible; short-lived counter rows use an impossible public-product prefix and expire through the existing table TTL.
+- Focused Function, infrastructure-template, and React tests passed. Final backend-change verification passed all steering, security, CI, and hosting invariants; warning-free lint; all 67 tests; the production build; Amplify backend TypeScript validation; and a network-enabled production dependency audit with 0 vulnerabilities. The integrated audit could not reach npm from the restricted workspace, and the identical audit passed immediately with network access.
+
 ## 2026-08-08 — Hosting and first-party media hardening Beta acceptance
 
 ### Stage

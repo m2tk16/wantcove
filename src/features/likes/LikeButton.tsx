@@ -14,6 +14,7 @@ export function LikeButton({ productSlug, productName, className }: { productSlu
     aria-label={`${state.liked ? 'Unlike' : 'Like'} ${productName}`}
     aria-pressed={state.liked}
     aria-busy={state.loading}
+    disabled={state.loading}
     title={state.error}
     onClick={() => toggle(productSlug)}
   >
