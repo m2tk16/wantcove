@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { productCategories } from '../../catalog/data/categories'
 import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import type { AdminProduct, AdminProductGateway, ProductDraft } from '../types'
 import { ProductEditor } from './ProductEditor'
@@ -12,6 +13,20 @@ const STARTER_SLUGS = [
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'The catalog operation failed.'
+}
+
+function trackedCategories(products: AdminProduct[]) {
+  const categories: string[] = [...productCategories]
+  const normalized = new Set(categories.map((category) => category.toLocaleLowerCase()))
+  for (const product of products) {
+    const category = product.category.trim()
+    const key = category.toLocaleLowerCase()
+    if (category && !normalized.has(key)) {
+      categories.push(category)
+      normalized.add(key)
+    }
+  }
+  return categories
 }
 
 export function AdminProductManager({ catalog }: { catalog: AdminProductGateway }) {
@@ -61,7 +76,7 @@ export function AdminProductManager({ catalog }: { catalog: AdminProductGateway 
   const missingStarterCount = STARTER_SLUGS.filter((slug) => !managedSlugs.has(slug)).length
 
   return <div className="admin-manager">
-    <ProductEditor busy={busy} key={editing?.slug ?? 'new-product'} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
+    <ProductEditor busy={busy} categories={trackedCategories(products)} key={editing?.slug ?? 'new-product'} onCancel={() => setEditing(undefined)} onSave={save} product={editing} />
     <section className="admin-product-list" aria-labelledby="managed-products-heading">
       <div className="admin-section-heading"><div><span className="kicker">GraphQL catalog</span><h2 id="managed-products-heading">Managed products</h2></div><button className="text-button" disabled={loading || busy} onClick={() => void refresh()} type="button">Refresh</button></div>
       {error ? <p className="form-error" role="alert">{error}</p> : null}

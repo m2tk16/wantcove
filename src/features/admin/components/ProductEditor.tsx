@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import type { AdminProduct, ProductDraft } from '../types'
 
+const ADD_CATEGORY_VALUE = '__add-category__'
+
 const emptyDraft: ProductDraft = {
   slug: '',
   name: '',
@@ -31,13 +33,15 @@ function initialDraft(product?: AdminProduct): ProductDraft {
   } : emptyDraft
 }
 
-export function ProductEditor({ product, busy, onCancel, onSave }: {
+export function ProductEditor({ product, busy, categories, onCancel, onSave }: {
   product?: AdminProduct
   busy: boolean
+  categories: readonly string[]
   onCancel(): void
   onSave(product: ProductDraft): Promise<boolean>
 }) {
   const [draft, setDraft] = useState<ProductDraft>(() => initialDraft(product))
+  const [addingCategory, setAddingCategory] = useState(() => Boolean(product?.category && !categories.includes(product.category)))
 
   function update<K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
@@ -46,7 +50,16 @@ export function ProductEditor({ product, busy, onCancel, onSave }: {
   async function submit(event: FormEvent) {
     event.preventDefault()
     const saved = await onSave(draft)
-    if (saved && !product) setDraft(emptyDraft)
+    if (saved && !product) {
+      setDraft(emptyDraft)
+      setAddingCategory(false)
+    }
+  }
+
+  function chooseCategory(value: string) {
+    const isAdding = value === ADD_CATEGORY_VALUE
+    setAddingCategory(isAdding)
+    update('category', isAdding ? '' : value)
   }
 
   return <form className="product-editor" onSubmit={submit}>
@@ -54,7 +67,12 @@ export function ProductEditor({ product, busy, onCancel, onSave }: {
     <div className="form-grid">
       <label>Slug<input disabled={Boolean(product)} maxLength={80} minLength={3} onChange={(event) => update('slug', event.target.value)} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="smart-reading-light" required value={draft.slug} /></label>
       <label>Name<input maxLength={120} minLength={2} onChange={(event) => update('name', event.target.value)} required value={draft.name} /></label>
-      <label>Category<input maxLength={60} minLength={2} onChange={(event) => update('category', event.target.value)} required value={draft.category} /></label>
+      <label>Category<select onChange={(event) => chooseCategory(event.target.value)} required value={addingCategory ? ADD_CATEGORY_VALUE : draft.category}>
+        <option value="">Choose category</option>
+        {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+        <option value={ADD_CATEGORY_VALUE}>+ Add category</option>
+      </select></label>
+      {addingCategory ? <label>New category<input autoFocus maxLength={60} minLength={2} onChange={(event) => update('category', event.target.value)} required value={draft.category} /></label> : null}
       <label>Featured rank<input max={10000} min={0} onChange={(event) => update('featuredRank', event.target.value ? Number(event.target.value) : undefined)} type="number" value={draft.featuredRank ?? ''} /></label>
       <label>Display price<input maxLength={32} onChange={(event) => update('priceLabel', event.target.value || undefined)} placeholder="$79.99" value={draft.priceLabel ?? ''} /></label>
       <label>Display rating<input maxLength={16} onChange={(event) => update('ratingLabel', event.target.value || undefined)} placeholder="4.8" value={draft.ratingLabel ?? ''} /></label>

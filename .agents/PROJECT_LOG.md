@@ -2,6 +2,27 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — Tracked category picker candidate
+
+### Stage
+
+Local admin UI candidate on `codex/admin-category-picker`, based on PR #20 merge commit `c21446c` and successful Amplify Beta job 35. The category code remains uncommitted and undeployed; no push, pull request, backend change, `main` change, or Production deployment has been made by this candidate. Separately, the owner-authorized Beta catalog correction below was performed through the existing signed-in, MFA-protected admin boundary.
+
+### Observed and updated
+
+- The admin editor accepted free-form category text even though WantCove already maintains a configured product-category list, making typos and inconsistent casing unnecessarily easy.
+- Split reusable product categories from navigation-only entries such as Trending and New arrivals. The admin picker combines those configured categories with distinct category values already stored in managed Products, so the owner-added Automotive category appears automatically.
+- Replaced free-form category entry with a select containing tracked categories and a `+ Add category` option. Choosing it reveals the existing server-bounded 2–60 character custom field; a successfully created draft resets both the form and add-category mode, while rejected saves retain them.
+- No category model or secondary persistence layer was added. A new category becomes tracked naturally when a Product using it is returned by the existing admin GraphQL list.
+
+### Catalog corrections, security, rollback, and verification
+
+- Hosted acceptance of job 35 found that the owner-published LASFIT route is misspelled as `lasft-floro-mats` and its display price lacks the `$` prefix. Because Product slug is the DynamoDB identifier and is disabled during edit, safe correction requires creating and publishing `lasfit-floor-mats`, then archiving the typo record rather than overwriting its key.
+- The category UI does not broaden mutation authorization or validation. Product writes remain server-enforced for `ADMINS`; category length remains bounded; no cookie, identifier, affiliate activation, or personal-data behavior changes. Terms and Privacy behavior remain unchanged.
+- Rollback restores the category text field and combined category constant. Existing Product records remain compatible because category storage is unchanged.
+- The signed-in Beta admin created and published `lasfit-floor-mats` by copying the existing LASFIT record and correcting its display price from `134.99` to `$134.99`. The public replacement route was verified with the intended image, rating, description, and price before `lasft-floro-mats` was archived (not deleted). A post-archive refresh confirmed the corrected route remains available and the typo record no longer appears in public recommendations.
+- Focused admin coverage passed all 8 tests, including configured categories, a managed Automotive value, custom-category creation, and custom-category retention after a rejected save. The normal fast gate passed steering, security, CI, and hosting invariants; warning-free lint; all 72 tests; and the 25-file, 787,490-byte media budget.
+
 ## 2026-08-08 — Dynamic product-image sizing candidate
 
 ### Stage

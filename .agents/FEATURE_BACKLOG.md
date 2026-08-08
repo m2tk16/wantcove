@@ -6,6 +6,7 @@ Log every proposed feature here when it is suggested. Assign a priority using `.
 
 | Priority | Feature | Value / effort | Status | Notes |
 | --- | --- | --- | --- | --- |
+| P3 High/Low | Tracked admin category picker | High / Low | Local candidate | Select configured and existing managed-product categories; `+ Add category` reveals a validated custom value that becomes tracked through the existing Product record, without a new backend model. |
 | P2 Bugs | Constrain dynamically added product images | High / Low | Local candidate | The shared unknown-image fallback now retains its responsive wrapper class so managed-product thumbnails and public catalog surfaces cannot expand a direct first-party image at its intrinsic dimensions. |
 | P2 Bugs | Preserve admin product draft after failed save | High / Low | Beta accepted | PR #18 and Amplify Beta job 33 passed. Hosted acceptance confirmed that rejected image validation preserves every controlled field; only a successful create resets the editor. |
 | P1 Security | Automated Production-readiness CI gate | High / Low | Beta accepted | PR #11 and Amplify Beta job 25 passed. The machine-readable profile and `main`-only CI gate fail closed while legal identity, monitored contact, jurisdiction review, or qualified legal review is incomplete; Beta work remains available. |
