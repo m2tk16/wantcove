@@ -16,11 +16,13 @@ describe('ResponsiveProductImage', () => {
     expect(image).toHaveAttribute('referrerpolicy', 'no-referrer')
   })
 
-  it('renders an unknown first-party path without inventing variant requests', () => {
-    const { container } = render(<ResponsiveProductImage alt="New product" loading="lazy" src="/products/new-product.webp" />)
+  it('preserves the picture sizing contract for an unknown first-party path without inventing variants', () => {
+    const { container } = render(<ResponsiveProductImage alt="New product" loading="lazy" pictureClassName="admin-product-picture" src="/products/new-product.webp" />)
     const image = screen.getByRole('img', { name: 'New product' })
+    const picture = container.querySelector('picture.admin-product-picture')
 
-    expect(container.querySelector('picture')).toBeNull()
+    expect(picture).toContainElement(image)
+    expect(container.querySelector('source')).toBeNull()
     expect(image).toHaveAttribute('src', '/products/new-product.webp')
     expect(image).not.toHaveAttribute('srcset')
   })
