@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 import type { CatalogGateway } from './features/catalog/CatalogProvider'
@@ -62,6 +62,11 @@ function renderAt(path: string) {
   return render(<App catalog={testCatalog} initialProducts={testProducts} />)
 }
 
+function renderWithCatalog(path: string, catalog: CatalogGateway, initialProducts: Product[] = []) {
+  window.history.replaceState({}, '', path)
+  return render(<App catalog={catalog} initialProducts={initialProducts} />)
+}
+
 describe('WantCove discovery routes', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/')
@@ -82,6 +87,47 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByRole('heading', { name: 'Adjustable Dumbbell Set' })).toBeInTheDocument()
     expect(screen.getByText(/WantCove may earn a commission if you buy through them/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /view retailer/i })).toBeDisabled()
+  })
+
+  it('waits for the live catalog before deciding that a product deep link is missing', async () => {
+    let resolveCatalog: (products: Product[]) => void = () => undefined
+    const delayedCatalog: CatalogGateway = {
+      isAvailable: true,
+      list: () => new Promise((resolve) => { resolveCatalog = resolve }),
+    }
+
+    renderWithCatalog('/products/levitating-globe-lamp', delayedCatalog)
+
+    expect(screen.getByRole('status')).toHaveTextContent(/finding that product/i)
+    expect(screen.queryByRole('heading', { name: /wandered off/i })).not.toBeInTheDocument()
+
+    await act(async () => { resolveCatalog(testProducts) })
+
+    expect(await screen.findByRole('heading', { name: 'Levitating Globe Lamp' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /wandered off/i })).not.toBeInTheDocument()
+  })
+
+  it('shows catalog availability failures instead of misreporting a missing product', async () => {
+    const unavailableCatalog: CatalogGateway = {
+      isAvailable: true,
+      list: async () => { throw new Error('offline') },
+    }
+
+    renderWithCatalog('/products/levitating-globe-lamp', unavailableCatalog)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/temporarily unavailable/i)
+    expect(screen.queryByRole('heading', { name: /wandered off/i })).not.toBeInTheDocument()
+  })
+
+  it('renders a genuine product 404 only after the live catalog finishes loading', async () => {
+    const emptyCatalog: CatalogGateway = {
+      isAvailable: true,
+      list: async () => [],
+    }
+
+    renderWithCatalog('/products/missing-product', emptyCatalog)
+
+    expect(await screen.findByRole('heading', { name: /wandered off/i })).toBeInTheDocument()
   })
 
   it('opens and closes the accessible mobile menu', () => {
