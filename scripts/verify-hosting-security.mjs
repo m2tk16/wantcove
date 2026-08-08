@@ -16,6 +16,7 @@ const expectedFiles = productNames.flatMap((name) => widths.get(name).flatMap((w
   `${name}-${width}.webp`,
 ]))
 const actualFiles = await readdir(productDirectory)
+const optimizedFiles = actualFiles.filter((name) => /\.(?:avif|webp)$/i.test(name))
 
 for (const file of expectedFiles) {
   if (!actualFiles.includes(file)) failures.push(`Optimized product asset is missing: ${file}`)
@@ -25,7 +26,7 @@ for (const file of actualFiles.filter((name) => /\.(?:png|jpe?g)$/i.test(name)))
 }
 
 let totalBytes = 0
-for (const file of expectedFiles.filter((name) => actualFiles.includes(name))) {
+for (const file of optimizedFiles) {
   const { size } = await stat(new URL(file, productDirectory))
   totalBytes += size
   if (size > 150_000) failures.push(`Optimized product asset exceeds 150 KB: ${file}`)
@@ -37,4 +38,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log(`Hosting security and ${expectedFiles.length} responsive product assets verified (${totalBytes} bytes).`)
+console.log(`Hosting security and ${optimizedFiles.length} optimized product assets verified (${totalBytes} bytes).`)

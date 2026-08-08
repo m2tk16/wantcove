@@ -2,6 +2,26 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-08 — LASFIT product-image optimization candidate
+
+### Stage
+
+Local media candidate on `codex/add-lasfit-product-image`, based on PR #18 merge commit `07e7538` and successful Amplify Beta job 33. No commit, push, pull request, Product mutation, Beta deployment, `main` change, Production deployment, or cloud-resource change has been made.
+
+### Updated
+
+- Converted the owner-supplied 934×748 JPEG source into a deployed-path candidate at `public/products/lasfit-floor-mats.webp` using a 560×448 WebP encoding tuned for the current catalog presentation.
+- Reduced the candidate from 225,757 bytes to 22,440 bytes, a 90.1% reduction. The original `src/assets/products/lastfit-floor-mats.jpg` was available for conversion and was never staged; final verification found that it was no longer present at its former local path. Only the optimized WebP is included in this candidate.
+- Expanded the hosting media gate so every AVIF or WebP under `public/products`, including manually added assets outside the original responsive manifest, is included in the per-file and total-byte budgets.
+- The eventual catalog image value must be `/products/lasfit-floor-mats.webp`; no browser upload or Product record update is part of this candidate.
+
+### Security, rights, rollback, and verification
+
+- The candidate retains the first-party `/products/` boundary and introduces no external image host, script, cookie, identifier, retailer redirect, authorization change, or personal-data processing. Terms and Privacy behavior are unchanged.
+- The supplied image contains LASFIT branding and marketing copy. On 2026-08-08, the WantCove owner explicitly confirmed that WantCove has usage rights for this creative. This records the owner's authorization attestation; it does not infer rights from Amazon affiliation.
+- Rollback is removal of the single WebP candidate plus restoration of the prior media-budget enumeration. No source JPEG is included in or required by the release candidate.
+- Visual inspection confirmed that the product and primary labels remain clear at catalog size. The normal fast gate passed steering, security, CI, and hosting invariants; warning-free lint; and all 71 tests. The expanded media gate verified 25 optimized assets totaling 787,490 bytes.
+
 ## 2026-08-08 — Admin draft failure-retention candidate
 
 ### Stage
