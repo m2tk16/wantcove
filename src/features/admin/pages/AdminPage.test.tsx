@@ -108,13 +108,13 @@ describe('AdminPage', () => {
     expect(screen.getByText(/Existing records will never be overwritten/)).toBeInTheDocument()
   })
 
-  it('protects migrated starters from destructive lifecycle actions while fallback is active', async () => {
+  it('allows normal lifecycle actions for migrated starters after fixture removal', async () => {
     const starter = { ...product, slug: 'levitating-globe-lamp', status: 'PUBLISHED' as const }
     render(<AdminPage auth={adminAuth()} catalog={catalog([starter])} />)
 
-    expect(await screen.findByText('Fallback protected')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Archive' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Archive' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument()
+    expect(screen.queryByText('Fallback protected')).not.toBeInTheDocument()
   })
 
   it('exposes edit, publish, and guarded delete actions to an authorized admin', async () => {

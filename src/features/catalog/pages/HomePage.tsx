@@ -1,7 +1,7 @@
 import { Link } from '../../../shared/navigation/Link'
 import { useCatalog } from '../CatalogContext'
 import { ProductSection, SectionHeading } from '../components/ProductSection'
-import { categories } from '../data/products'
+import { categories } from '../data/categories'
 
 const categoryIcons = ['◔', '✦', '◉', '▣', '⌂', '♨', '●', '▲', '◆', '◇', '☻']
 const featuredCategoryIcons = ['◉', '▣', '⌂', '♨', '●', '▲', '☻']

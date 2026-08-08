@@ -142,6 +142,7 @@ button { font:inherit; }
 .footer-legal a,.footer-link-button { color:white; font-size:.78rem; text-decoration:none; }
 .footer-link-button { padding:0; border:0; background:transparent; cursor:pointer; }
 .footer-legal a:hover { text-decoration:underline; }
+.footer-legal .associate-statement { margin:0 0 4px; color:white; font-size:.82rem; font-weight:750; }
 .footer-legal small { display:block; color:#98a6ac; line-height:1.5; }
 .legal-page { max-width:960px; margin:0 auto; padding:80px clamp(20px,6vw,80px) 100px; }
 .legal-page>header { padding-bottom:44px; border-bottom:1px solid var(--line); }

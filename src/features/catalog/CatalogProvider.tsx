@@ -1,34 +1,47 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { publicCatalogClient } from '../../services/catalog/publicCatalogClient'
 import { CatalogContext } from './CatalogContext'
-import { products as fixtureProducts } from './data/products'
 import type { Product } from './types'
 
-function mergeCatalog(managedProducts: Product[]) {
-  const managedSlugs = new Set(managedProducts.map((product) => product.slug))
-  return [...managedProducts, ...fixtureProducts.filter((product) => !managedSlugs.has(product.slug))]
+export type CatalogGateway = {
+  isAvailable: boolean
+  list(): Promise<Product[]>
 }
 
-export function CatalogProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(fixtureProducts)
-  const [loading, setLoading] = useState(publicCatalogClient.isAvailable)
+export function CatalogProvider({
+  children,
+  catalog = publicCatalogClient,
+  initialProducts = [],
+}: {
+  children: ReactNode
+  catalog?: CatalogGateway
+  initialProducts?: Product[]
+}) {
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [loading, setLoading] = useState(catalog.isAvailable)
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    if (!publicCatalogClient.isAvailable) return
+    if (!catalog.isAvailable) return
     let active = true
-    void publicCatalogClient.list()
+    void catalog.list()
       .then((managedProducts) => {
-        if (active) setProducts(mergeCatalog(managedProducts))
+        if (active) {
+          setProducts(managedProducts)
+          setError(undefined)
+        }
       })
       .catch(() => {
-        if (active) setError('The live catalog is temporarily unavailable. Showing the curated starter collection.')
+        if (active) {
+          setProducts([])
+          setError('The live catalog is temporarily unavailable. Please try again soon.')
+        }
       })
       .finally(() => {
         if (active) setLoading(false)
       })
     return () => { active = false }
-  }, [])
+  }, [catalog])
 
   const value = useMemo(() => ({ products, loading, error }), [error, loading, products])
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>

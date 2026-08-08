@@ -12,5 +12,4 @@ export type Product = {
   amazonAsin?: string
   retailerUrl?: string
   featuredRank?: number
-  source?: 'fixture' | 'managed'
 }

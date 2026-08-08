@@ -98,23 +98,12 @@ describe('manage-products Function', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('reserves starter slugs so an archived managed record cannot reveal its fixture fallback', async () => {
-    const existingStarter = {
-      slug: 'levitating-globe-lamp',
-      status: 'PUBLISHED',
-      name: 'Existing starter',
-      createdAt: '2026-08-01T00:00:00.000Z',
-      updatedAt: '2026-08-01T00:00:00.000Z',
-      __typename: 'Product',
-    };
-    const send = vi.fn().mockResolvedValue({ Item: existingStarter });
+  it('reserves starter slugs for the non-overwriting migration path', async () => {
+    const send = vi.fn();
     const handler = createManageProductsHandler(send);
 
     await expect(handler(event({ ...productInput, slug: 'levitating-globe-lamp' }))).rejects.toThrow(/reserved/);
-    await expect(handler(event({ action: 'ARCHIVE', slug: 'levitating-globe-lamp' }))).rejects.toThrow(/fixture fallback/);
-    await expect(handler(event({ action: 'DELETE', slug: 'levitating-globe-lamp' }))).rejects.toThrow(/fixture fallback/);
-    expect(send).toHaveBeenCalledTimes(2);
-    expect(send.mock.calls.every(([command]) => command instanceof GetCommand)).toBe(true);
+    expect(send).not.toHaveBeenCalled();
   });
 
   it('migrates all missing starters as published records without affiliate destinations', async () => {
@@ -240,6 +229,7 @@ describe('manage-products Function', () => {
   it('archives an existing product and accepts the serialized Cognito group claim', async () => {
     const existing: StoredProduct = {
       ...productInput,
+      slug: 'levitating-globe-lamp',
       status: 'PUBLISHED',
       createdAt: '2026-08-01T00:00:00.000Z',
       updatedAt: '2026-08-02T00:00:00.000Z',

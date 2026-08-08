@@ -24,7 +24,6 @@ function parseProduct(value: unknown): Product | null {
     price: readString(record, 'priceLabel'),
     rating: readString(record, 'ratingLabel'),
     featuredRank: typeof record.featuredRank === 'number' ? record.featuredRank : undefined,
-    source: 'managed',
   }
 }
 

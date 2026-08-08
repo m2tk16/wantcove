@@ -16,13 +16,20 @@ describe('product-likes Function', () => {
   });
 
   it('reads only the server-derived identity key and honors an unexpired like', async () => {
-    const send = vi.fn().mockResolvedValue({ Item: { expiresAt: Math.floor(Date.now() / 1000) + 60 } });
+    const send = vi.fn()
+      .mockResolvedValueOnce({ Item: { status: 'PUBLISHED' } })
+      .mockResolvedValueOnce({ Item: { expiresAt: Math.floor(Date.now() / 1000) + 60 } });
     const handler = createProductLikesHandler(send);
 
     await expect(handler(event({ productSlug: 'levitating-globe-lamp' }))).resolves.toBe(true);
-    const command = send.mock.calls[0][0];
-    expect(command).toBeInstanceOf(GetCommand);
-    expect(command.input).toMatchObject({
+    expect(send.mock.calls[0][0]).toBeInstanceOf(GetCommand);
+    expect(send.mock.calls[0][0].input).toMatchObject({
+      TableName: 'ProductTable',
+      Key: { slug: 'levitating-globe-lamp' },
+      ConsistentRead: true,
+    });
+    expect(send.mock.calls[1][0]).toBeInstanceOf(GetCommand);
+    expect(send.mock.calls[1][0].input).toMatchObject({
       TableName: 'ProductLikesTable',
       Key: { productSlug: 'levitating-globe-lamp', actorKey: 'us-east-1:device-123' },
       ConsistentRead: true,
@@ -30,12 +37,12 @@ describe('product-likes Function', () => {
   });
 
   it('stores a bounded like record', async () => {
-    const send = vi.fn().mockResolvedValue({});
+    const send = vi.fn().mockResolvedValueOnce({ Item: { status: 'PUBLISHED' } }).mockResolvedValueOnce({});
     const handler = createProductLikesHandler(send);
     const before = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 180;
 
     await expect(handler(event({ productSlug: 'portable-pizza-oven', liked: true }))).resolves.toBe(true);
-    const command = send.mock.calls[0][0];
+    const command = send.mock.calls[1][0];
     expect(command).toBeInstanceOf(PutCommand);
     expect(command.input.Item).toMatchObject({
       productSlug: 'portable-pizza-oven',
@@ -45,11 +52,11 @@ describe('product-likes Function', () => {
   });
 
   it('deletes the identity-scoped row when unliked', async () => {
-    const send = vi.fn().mockResolvedValue({});
+    const send = vi.fn().mockResolvedValueOnce({ Item: { status: 'PUBLISHED' } }).mockResolvedValueOnce({});
     const handler = createProductLikesHandler(send);
 
     await expect(handler(event({ productSlug: 'wireless-earbuds', liked: false }))).resolves.toBe(false);
-    const command = send.mock.calls[0][0];
+    const command = send.mock.calls[1][0];
     expect(command).toBeInstanceOf(DeleteCommand);
     expect(command.input.Key).toEqual({ productSlug: 'wireless-earbuds', actorKey: 'us-east-1:device-123' });
   });
@@ -60,18 +67,18 @@ describe('product-likes Function', () => {
 
     await expect(handler(event({ productSlug: 'unknown-product' }))).rejects.toThrow('Unknown product.');
     await expect(handler(event({ productSlug: 'levitating-globe-lamp' }, null))).rejects.toThrow('Unauthorized');
+    expect(send).toHaveBeenCalledTimes(1);
   });
 
-  it('allows a dynamic slug only when the Product table marks it published', async () => {
-    const send = vi.fn()
-      .mockResolvedValueOnce({ Item: { status: 'PUBLISHED' } })
-      .mockResolvedValueOnce({ Item: { expiresAt: Math.floor(Date.now() / 1000) + 60 } });
+  it('rejects a like when the Product table does not mark the product published', async () => {
+    const send = vi.fn().mockResolvedValueOnce({ Item: { status: 'DRAFT' } });
     const handler = createProductLikesHandler(send);
 
-    await expect(handler(event({ productSlug: 'smart-reading-light' }))).resolves.toBe(true);
+    await expect(handler(event({ productSlug: 'smart-reading-light' }))).rejects.toThrow('Unknown product.');
     expect(send.mock.calls[0][0].input).toMatchObject({
       TableName: 'ProductTable',
       Key: { slug: 'smart-reading-light' },
     });
+    expect(send).toHaveBeenCalledTimes(1);
   });
 });
