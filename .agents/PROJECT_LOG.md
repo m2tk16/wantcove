@@ -2,6 +2,32 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Authenticated administrator likes Beta acceptance
+
+### Stage
+
+Hosted Beta acceptance completed for merge commit `650d00e` from PR #7. Amplify Beta job 21 completed BUILD, DEPLOY, and VERIFY successfully. This completion record is local on `codex/record-admin-like-acceptance`; no documentation commit, push, Production branch, or Production resource has been changed.
+
+### Hosted acceptance
+
+- Cognito confirmed the administrator account remains enabled, `CONFIRMED`, and email-verified after the owner completed a private password reset. No password, TOTP code, session token, or recovery secret was entered into the repository, browser automation, or project log.
+- The hosted `/admin` route restored the authenticated session for `m2tk16@gmail.com`, displayed the server-issued `ADMINS` group state, and retained required MFA protection.
+- On the hosted levitating-globe product route, signed-in Like persisted after a full reload. The subsequent Unlike deletion also persisted after a full reload, leaving no temporary acceptance like behind.
+- Browser inspection reported no warning or error during the complete lifecycle.
+
+### Backend and request-rate evidence
+
+- Read-only deployment inspection confirmed the existing `ADMINS` preferred role has one inline policy limited to `appsync:GraphQL` on only `getViewerProductLike` and `setViewerProductLike` for the Beta AppSync API.
+- CloudWatch recorded the bounded lifecycle traffic: four Function invocations during the initial authenticated page-load minute and fourteen during the deliberate Like → reload → Unlike → reload minute. The fourteen calls are the expected four product reads per render plus the two explicit mutations; both metric windows reported zero Lambda errors, and no additional invocation datapoint appeared through the following three idle minutes.
+- The acceptance flow made no Product mutation, catalog migration, affiliate activation, or Production request.
+
+### Security, legal, rollback, and next
+
+- Actor identity remains server-derived from Cognito, likes remain identity-scoped with bounded retention, and the administrator receives no catalog or API-wide permission from this repair.
+- The repair and password recovery introduce no new cookie, personal-data use, affiliate destination, purchase flow, or disclosure claim. Terms and Privacy therefore do not require an update.
+- Rollback remains a reviewed removal of the two-field policy through Beta; no Product or like-row migration is required.
+- Record this accepted result through the protected documentation PR flow. Production promotion remains a separate major release requiring an explicit approval, a fresh full release gate, legal-blocker review, rollback review, and hosted smoke checks.
+
 ## 2026-08-07 — Admin like-policy stack-cycle correction
 
 ### Stage
