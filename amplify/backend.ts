@@ -38,10 +38,10 @@ backend.productLikesFunction.addEnvironment('PRODUCT_TABLE_NAME', productTable.t
 
 const productLikesStack = backend.createStack('ProductLikes');
 // Identity Pools honor the preferred IAM role emitted for a User Pool group.
-// Attach this field-scoped policy from the third ProductLikes stack so Auth and
-// Data do not gain a circular cross-stack dependency.
+// Keep this field-scoped policy in Data, which already owns the API and depends
+// on Auth. ProductLikes supplies table values to Data and must not reference it.
 attachAdminProductLikesPolicy(
-  productLikesStack,
+  backend.data.stack,
   backend.data.resources.graphqlApi.arn,
   backend.auth.resources.groups['ADMINS'].role,
 );
