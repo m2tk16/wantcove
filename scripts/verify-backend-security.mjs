@@ -63,7 +63,7 @@ const requirements = [
 
 const backendRequirements = [
   ['Public self-registration must remain disabled', /allowAdminCreateUserOnly\s*:\s*true/],
-  ['The field-scoped like policy must attach only to the ADMINS preferred role', /attachAdminProductLikesPolicy\([\s\S]*backend\.auth\.resources\.groups\[['"]ADMINS['"]\]\.role/],
+  ['The field-scoped like policy must be created in Data and attach only to the ADMINS preferred role', /attachAdminProductLikesPolicy\(\s*backend\.data\.stack,\s*backend\.data\.resources\.graphqlApi\.arn,\s*backend\.auth\.resources\.groups\[['"]ADMINS['"]\]\.role/],
   ['The product manager must have table read/write access', /productTable\.grantReadWriteData\(manageProductsLambda\)/],
   ['The public catalog must have table read-only access', /productTable\.grantReadData\(publicCatalogLambda\)/],
   ['Product likes must have product-table read-only access', /productTable\.grantReadData\(productLikesLambda\)/],

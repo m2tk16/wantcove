@@ -2,6 +2,31 @@
 
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
+## 2026-08-07 — Admin like-policy stack-cycle correction
+
+### Stage
+
+Local corrective backend candidate on `codex/fix-admin-like-policy-stack`, based on Beta merge commit `6c7ddbb` from PR #6. Amplify Beta job 20 failed safely during BUILD; DEPLOY and VERIFY were cancelled, so hosted Beta resources and data remain on the previously accepted backend. Production remains untouched.
+
+### Failure evidence and correction
+
+- Job 20 passed repository checks and asset publication, then Amplify synthesis reported a circular dependency between the Data and ProductLikes nested stacks.
+- ProductLikes already supplies its DynamoDB table name and permissions to the Data-group resolver Function, so Data depends on ProductLikes. Creating the administrator AppSync policy in ProductLikes added the reverse ProductLikes → Data API reference.
+- Moved only the policy construct’s scope to the Data stack. Data already owns the AppSync API and depends on Auth, so attaching the exact field policy to the existing `ADMINS` role adds no reverse dependency.
+- Strengthened the backend invariant to require `backend.data.stack` as the policy scope and prevent recurrence. The CDK synthesis regression continues to require one `appsync:GraphQL` statement, exactly two like-field ARNs, the intended role attachment, and no wildcard.
+
+### Security, data, legal, and rollback review
+
+- Authorization is unchanged from the reviewed intent: only `getViewerProductLike` and `setViewerProductLike` are added to the `ADMINS` preferred IAM role. No API-wide, model, DynamoDB, admin-mutation, public, or self-registration access is added.
+- The failed job made no deployment or data change. The corrective candidate performs no data migration or rewrite and does not change actor identity, published-product validation, or retention.
+- Terms, Privacy, cookies, affiliate behavior, and outbound destinations are unaffected.
+- Rollback remains removal of the field-scoped policy; the hosted pre-job-20 backend is already the effective rollback state.
+
+### Tests and next
+
+- The complete backend-change gate passes: steering, security and CI invariants; warning-free lint; all 46 tests; production build; backend TypeScript validation; and a production dependency audit with 0 vulnerabilities. The audit was rerun with network access after the sandbox blocked npm’s registry endpoint.
+- Use the protected Beta PR flow. A successful Amplify BUILD/DEPLOY/VERIFY is required before signed-in Like → reload → Unlike → reload acceptance and idle-request monitoring.
+
 ## 2026-08-07 — Authenticated administrator like-role repair candidate
 
 ### Stage
