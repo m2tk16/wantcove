@@ -1,5 +1,19 @@
 # WantCove project log
 
+## 2026-08-08 — Contact inbox Beta deployment and notification decision
+
+### Stage
+
+PR #24 merged to `beta` as `b904c8b`. Amplify Beta job 39 completed `BUILD`, `DEPLOY`, and `VERIFY` successfully, including the new contact-message Function, DynamoDB table, AppSync operations, IAM policy, monitoring, and frontend. Production and `main` remain unchanged.
+
+### Hosted verification and owner preference
+
+- Hosted Beta renders the enabled first name, last name, email, optional phone, and message form; the public Categories page includes the live Automotive category and filtered route; and the LASFIT product exposes the validated `https://amzn.to/4fMjHIN` retailer link with the required adjacent Associate disclosure.
+- No test contact-message record was created during automated verification. End-to-end submit, restricted admin read, and delete acceptance remain with the owner so the verification process does not create personal data without an explicit submission.
+- A direct custom-domain product load initially reused the browser's prior HTML asset reference. The Amplify default domain and a cache-busted custom-domain request both loaded the job 39 assets and working retailer link. A hard refresh is the immediate recovery if an already-open browser tab displays the prior disabled action.
+- The owner originally expected each website submission to send email to `wantcove@gmail.com`, but prefers the restricted Admin message center as the single system of record because it reduces navigation. A second delivery layer that also emails the submitted message to Gmail is explicitly classified as low value / medium effort and deferred; no implementation time should be invested now.
+- Before that deferred feature copies visitor-provided contents into Gmail, define a verified server-side sender, delivery-failure handling, monitoring, duplicate-delivery behavior, legal disclosure, retention implications, and tests. The protected Admin inbox must remain authoritative even if the notification layer fails.
+
 ## 2026-08-08 — Category, contact-form, and retailer-link correction candidate
 
 ### Stage
