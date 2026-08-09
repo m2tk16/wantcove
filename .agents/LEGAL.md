@@ -4,7 +4,7 @@ This file is a release guardrail, not legal advice. Qualified counsel must revie
 
 ## Required public routes
 
-- `/terms` and `/privacy` must remain available from the footer on every public page.
+- `/contact`, `/terms`, and `/privacy` must remain available from the footer on every public page.
 - They are footer-only legal links and do not belong in primary product navigation.
 - Each policy displays an effective date and last-updated date.
 
@@ -40,11 +40,11 @@ Owner-provided notice received 2026-08-07:
 
 ## Production-readiness record
 
-Owner-provided facts recorded 2026-08-07:
+Owner-provided facts recorded 2026-08-07 and updated 2026-08-08:
 
 - Public operator/brand name: `WantCove`. The legal entity or individual identity behind that name has not been reviewed, so this is not a completed legal-identity record.
 - Location: Tennessee, United States. Applicable Tennessee and United States requirements, governing-law language, privacy rights, and dispute terms have not received jurisdiction-specific review.
-- Planned public contact: `wantcove@gmail.com`. The owner has not created or confirmed availability of this mailbox. It is not verified, not recorded as monitored, and must not be published as an active contact method until those facts change.
+- Public contact: `wantcove@gmail.com`. On 2026-08-08 the owner confirmed that the mailbox was created and will be monitored for WantCove contact and privacy requests. It may be published as the active contact method. The website uses a `mailto:` handoff rather than a contact form; Google/Gmail and the sender's email provider process the resulting message.
 - Qualified legal review: not started.
 - Release status: Production and commercial affiliate links remain blocked. `.agents/PRODUCTION_READINESS.json` is the machine-readable source for this status, and `npm run verify:release` must fail until the required reviews and contact verification are truthfully complete.
 

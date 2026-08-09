@@ -3,6 +3,7 @@ import { AdminPasswordRecoveryPage } from '../features/admin/pages/AdminPassword
 import { CategoriesPage } from '../features/catalog/pages/CategoriesPage'
 import { CatalogListing, ProductRoute } from '../features/catalog/pages/CatalogRoutes'
 import { HomePage } from '../features/catalog/pages/HomePage'
+import { ContactPage } from '../features/contact/pages/ContactPage'
 import { PrivacyPage } from '../features/legal/pages/PrivacyPage'
 import { TermsPage } from '../features/legal/pages/TermsPage'
 import { NotFoundPage } from '../shared/pages/NotFoundPage'
@@ -20,6 +21,7 @@ export function resolveRoute(path: string) {
     case '/admin/forgot-password': return <AdminPasswordRecoveryPage />
     case '/terms': return <TermsPage />
     case '/privacy': return <PrivacyPage />
+    case '/contact': return <ContactPage />
     default: return <NotFoundPage />
   }
 }
