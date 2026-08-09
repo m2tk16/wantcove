@@ -13,6 +13,12 @@ const productLikesHandler = await readFile('amplify/functions/product-likes/hand
 const productLikesAbuseControls = await readFile('amplify/functions/product-likes/abuse-controls.ts', 'utf8')
 const productLikesMonitoring = await readFile('amplify/monitoring/product-like-abuse-controls.ts', 'utf8')
 const adminProductLikesPolicy = await readFile('amplify/policies/admin-product-likes.ts', 'utf8')
+const adminContactSubmissionPolicy = await readFile('amplify/policies/admin-contact-submission.ts', 'utf8')
+const contactMessagesFunctionResource = await readFile('amplify/functions/contact-messages/resource.ts', 'utf8')
+const contactMessagesHandler = await readFile('amplify/functions/contact-messages/handler.ts', 'utf8')
+const contactMessagesAbuseControls = await readFile('amplify/functions/contact-messages/abuse-controls.ts', 'utf8')
+const contactMessagesMonitoring = await readFile('amplify/monitoring/contact-message-abuse-controls.ts', 'utf8')
+const amazonRetailer = await readFile('amplify/shared/amazon-retailer.ts', 'utf8')
 const catalogProvider = await readFile('src/features/catalog/CatalogProvider.tsx', 'utf8')
 
 const requirements = [
@@ -61,11 +67,20 @@ const requirements = [
     label: 'Identity-pool like operations must use the supported Function handler',
     pattern: /getViewerProductLike[\s\S]*a\.handler\.function\(productLikesFunction\)[\s\S]*setViewerProductLike[\s\S]*a\.handler\.function\(productLikesFunction\)/,
   },
+  {
+    label: 'Public contact submission must use guest identity-pool authorization and the bounded Function',
+    pattern: /submitContactMessage[\s\S]*allow\.guest\(\)[\s\S]*allow\.authenticated\(['"]identityPool['"]\)[\s\S]*a\.handler\.function\(contactMessagesFunction\)/,
+  },
+  {
+    label: 'Contact inbox reads and deletes must remain ADMINS-only Function operations',
+    pattern: /listContactMessages[\s\S]*allow\.group\(['"]ADMINS['"]\)[\s\S]*a\.handler\.function\(contactMessagesFunction\)[\s\S]*deleteContactMessage[\s\S]*allow\.group\(['"]ADMINS['"]\)[\s\S]*a\.handler\.function\(contactMessagesFunction\)/,
+  },
 ]
 
 const backendRequirements = [
   ['Public self-registration must remain disabled', /allowAdminCreateUserOnly\s*:\s*true/],
   ['The field-scoped like policy must be created in Data and attach only to the ADMINS preferred role', /attachAdminProductLikesPolicy\(\s*backend\.data\.stack,\s*backend\.data\.resources\.graphqlApi\.arn,\s*backend\.auth\.resources\.groups\[['"]ADMINS['"]\]\.role/],
+  ['The field-scoped contact policy must attach only to the ADMINS preferred role', /attachAdminContactSubmissionPolicy\(\s*backend\.data\.stack,\s*backend\.data\.resources\.graphqlApi\.arn,\s*backend\.auth\.resources\.groups\[['"]ADMINS['"]\]\.role/],
   ['The product manager must have table read/write access', /productTable\.grantReadWriteData\(manageProductsLambda\)/],
   ['The public catalog must have table read-only access', /productTable\.grantReadData\(publicCatalogLambda\)/],
   ['Product likes must have product-table read-only access', /productTable\.grantReadData\(productLikesLambda\)/],
@@ -75,6 +90,10 @@ const backendRequirements = [
   ['Product likes must have point-in-time recovery', /pointInTimeRecoverySpecification\s*:\s*\{\s*pointInTimeRecoveryEnabled\s*:\s*true/],
   ['Only the product-likes Function may access the table', /productLikesTable\.grantReadWriteData\(productLikesLambda\)/],
   ['The product-likes table name must be injected by the backend', /backend\.productLikesFunction\.addEnvironment\(['"]PRODUCT_LIKES_TABLE_NAME['"]\s*,\s*productLikesTable\.tableName\)/],
+  ['Contact messages must expire and retain point-in-time recovery', /ContactMessagesTable[\s\S]*pointInTimeRecoveryEnabled\s*:\s*true[\s\S]*timeToLiveAttribute\s*:\s*['"]expiresAt['"]/],
+  ['Contact inbox must use the type-and-created-time index', /addGlobalSecondaryIndex\([\s\S]*indexName\s*:\s*['"]byTypeCreatedAt['"][\s\S]*recordType[\s\S]*createdAt/],
+  ['Only the contact Function may access contact storage', /contactMessagesTable\.grantReadWriteData\(contactMessagesLambda\)/],
+  ['Contact table and index names must be injected by the backend', /CONTACT_MESSAGES_TABLE_NAME[\s\S]*CONTACT_MESSAGES_INDEX_NAME/],
 ]
 
 const authRequirements = [
@@ -160,8 +179,12 @@ if (!/item\.status\s*!==\s*['"]PUBLISHED['"]/.test(publicCatalogHandler) || !/Pr
   failures.push('Public catalog must filter drafts and project only public fields')
 }
 
-if (/item\.(amazonAsin|retailerUrl)/.test(publicCatalogHandler) || /PROJECTION\s*=.*(amazonAsin|retailerUrl)/.test(publicCatalogHandler)) {
-  failures.push('Disabled affiliate identifiers and URLs must not enter the public catalog payload')
+if (!/safeAmazonSpecialLink\(item\.retailerUrl\)/.test(publicCatalogHandler) || !/PROJECTION\s*=.*amazonAsin.*retailerUrl/.test(publicCatalogHandler)) {
+  failures.push('Public retailer destinations must be projected only through the Amazon Special Link validator')
+}
+
+if (!/host === ['"]amzn\.to['"]/.test(amazonRetailer) || !/searchParams\.get\(['"]tag['"]\) !== AMAZON_ASSOCIATE_ID/.test(amazonRetailer) || !/AMAZON_ASSOCIATE_ID\s*=\s*['"]wantcove-20['"]/.test(amazonRetailer)) {
+  failures.push('Retailer links must remain limited to Amazon short links or the exact WantCove Associate tag')
 }
 
 if (!/PRODUCT_LIKE_TTL_SECONDS\s*=\s*60\s*\*\s*60\s*\*\s*24\s*\*\s*180/.test(productLikesHandler)) {
@@ -181,8 +204,28 @@ if (!/logging\s*:\s*\{[\s\S]*format\s*:\s*['"]text['"][\s\S]*retention\s*:\s*['"
   failures.push('Product-like Function logs must retain a bounded one-month expiration compatible with aggregate metrics')
 }
 
-if (![productLikesFunctionResource, manageProductsFunctionResource, publicCatalogFunctionResource].every((resource) => /resourceGroupName\s*:\s*['"]data['"]/.test(resource))) {
+if (![productLikesFunctionResource, manageProductsFunctionResource, publicCatalogFunctionResource, contactMessagesFunctionResource].every((resource) => /resourceGroupName\s*:\s*['"]data['"]/.test(resource))) {
   failures.push('Data resolver Functions must share the data resource group to avoid nested-stack cycles')
+}
+
+if (!/cognitoIdentityId/.test(contactMessagesHandler) || /sourceIp|arguments\.actorKey/.test(`${contactMessagesHandler}\n${contactMessagesAbuseControls}`)) {
+  failures.push('Contact submissions must use the server-derived guest identity and never a raw IP or client actor key')
+}
+
+if (!/CONTACT_MESSAGE_TTL_SECONDS\s*=\s*60\s*\*\s*60\s*\*\s*24\s*\*\s*90/.test(contactMessagesHandler) || !/ConditionExpression:\s*['"]attribute_not_exists\(id\)['"]/.test(contactMessagesHandler)) {
+  failures.push('Contact messages must use a conditional write and documented 90-day TTL')
+}
+
+if (!/CONTACT_RATE_LIMIT_MAX_REQUESTS\s*=\s*5/.test(contactMessagesAbuseControls) || !/CONTACT_RATE_LIMIT_WINDOW_SECONDS\s*=\s*60\s*\*\s*10/.test(contactMessagesAbuseControls) || !/Dimensions:\s*\[\[\]\]/.test(contactMessagesAbuseControls)) {
+  failures.push('Contact submissions must retain the bounded identity-scoped aggregate rate limit')
+}
+
+if (!/CONTACT_MESSAGES_RESERVED_CONCURRENCY\s*=\s*5/.test(contactMessagesMonitoring) || !/ContactMessageRateLimitAlarm/.test(contactMessagesMonitoring) || !/ContactMessageThrottleAlarm/.test(contactMessagesMonitoring)) {
+  failures.push('Contact infrastructure must retain bounded concurrency and abuse alarms')
+}
+
+if (!/timeoutSeconds\s*:\s*10/.test(contactMessagesFunctionResource) || !/retention\s*:\s*['"]1 month['"]/.test(contactMessagesFunctionResource)) {
+  failures.push('Contact Function must retain bounded execution and log retention')
 }
 
 
@@ -205,6 +248,10 @@ if (/types\/(?!Query\/fields\/getViewerProductLike|Mutation\/fields\/setViewerPr
 const adminPolicyActions = adminProductLikesPolicy.match(/actions\s*:\s*\[([^\]]*)\]/)?.[1].replace(/\s/g, '') ?? ''
 if (!/^['"]appsync:GraphQL['"]$/.test(adminPolicyActions) || /resources\s*:\s*\[[^\]]*['"]\*['"]/.test(adminProductLikesPolicy)) {
   failures.push('The ADMINS product-like policy must not use wildcard resources or unrelated actions')
+}
+
+if (!/actions\s*:\s*\[['"]appsync:GraphQL['"]\]/.test(adminContactSubmissionPolicy) || !/\/types\/Mutation\/fields\/submitContactMessage/.test(adminContactSubmissionPolicy) || /resources\s*:\s*\[[^\]]*['"]\*['"]/.test(adminContactSubmissionPolicy)) {
+  failures.push('The ADMINS contact policy must grant only the submitContactMessage AppSync field')
 }
 
 if (failures.length > 0) {

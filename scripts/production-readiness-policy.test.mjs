@@ -21,6 +21,7 @@ describe('Production readiness policy', () => {
       'The operator legal identity has not been reviewed.',
       'Jurisdiction-specific requirements have not been reviewed.',
       'Qualified legal review is not complete.',
+      'Affiliate links cannot be enabled before affiliate launch approval.',
     ])
   })
 

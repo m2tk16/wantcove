@@ -5,10 +5,11 @@ import {
   ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { AppSyncResolverHandler } from 'aws-lambda';
+import { safeAmazonSpecialLink } from '../../shared/amazon-retailer';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PROJECTION = 'slug, #name, description, category, imageUrl, imageAlt, priceLabel, ratingLabel, featuredRank, publishedAt';
+const PROJECTION = 'slug, #name, description, category, imageUrl, imageAlt, priceLabel, ratingLabel, amazonAsin, retailerUrl, featuredRank, publishedAt';
 
 type PublicCatalogArguments = { slug?: string };
 type PublicCatalogEvent = { arguments: PublicCatalogArguments };
@@ -27,6 +28,7 @@ function requireTableName() {
 
 function publicProduct(item: Record<string, unknown> | undefined) {
   if (!item || item.status !== 'PUBLISHED') return null;
+  const retailerUrl = safeAmazonSpecialLink(item.retailerUrl);
   return {
     slug: item.slug,
     name: item.name,
@@ -36,6 +38,8 @@ function publicProduct(item: Record<string, unknown> | undefined) {
     imageAlt: item.imageAlt,
     priceLabel: item.priceLabel,
     ratingLabel: item.ratingLabel,
+    ...(typeof item.amazonAsin === 'string' ? { amazonAsin: item.amazonAsin } : {}),
+    ...(retailerUrl ? { retailerUrl } : {}),
     featuredRank: item.featuredRank,
     publishedAt: item.publishedAt,
   };

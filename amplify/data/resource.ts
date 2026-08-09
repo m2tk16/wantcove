@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { manageProductsFunction } from '../functions/manage-products/resource';
 import { publicCatalogFunction } from '../functions/public-catalog/resource';
 import { productLikesFunction } from '../functions/product-likes/resource';
+import { contactMessagesFunction } from '../functions/contact-messages/resource';
 
 const schema = a.schema({
   ProductStatus: a.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']),
@@ -68,6 +69,30 @@ const schema = a.schema({
     .returns(a.json().required())
     .authorization((allow) => [allow.group('ADMINS')])
     .handler(a.handler.function(manageProductsFunction)),
+  submitContactMessage: a
+    .mutation()
+    .arguments({
+      firstName: a.string().required(),
+      lastName: a.string().required(),
+      email: a.string().required(),
+      phone: a.string(),
+      message: a.string().required(),
+      website: a.string(),
+    })
+    .returns(a.boolean().required())
+    .authorization((allow) => [allow.guest(), allow.authenticated('identityPool')])
+    .handler(a.handler.function(contactMessagesFunction)),
+  listContactMessages: a
+    .query()
+    .returns(a.json().required())
+    .authorization((allow) => [allow.group('ADMINS')])
+    .handler(a.handler.function(contactMessagesFunction)),
+  deleteContactMessage: a
+    .mutation()
+    .arguments({ id: a.string().required() })
+    .returns(a.boolean().required())
+    .authorization((allow) => [allow.group('ADMINS')])
+    .handler(a.handler.function(contactMessagesFunction)),
   getViewerProductLike: a
     .query()
     .arguments({ productSlug: a.string().required() })

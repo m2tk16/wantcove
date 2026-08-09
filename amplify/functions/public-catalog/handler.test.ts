@@ -10,7 +10,7 @@ describe('public-catalog Function', () => {
   it('returns only published products in featured order', async () => {
     const send = vi.fn().mockResolvedValue({
       Items: [
-        { slug: 'second', name: 'Second', status: 'PUBLISHED', featuredRank: 2, priceLabel: '$29.99', ratingLabel: '4.6' },
+        { slug: 'second', name: 'Second', status: 'PUBLISHED', featuredRank: 2, priceLabel: '$29.99', ratingLabel: '4.6', amazonAsin: 'B012345678', retailerUrl: 'https://www.amazon.com/dp/B012345678?tag=wantcove-20' },
         { slug: 'hidden', name: 'Hidden', status: 'DRAFT', featuredRank: 1 },
         { slug: 'first', name: 'First', status: 'PUBLISHED', featuredRank: 1 },
       ],
@@ -19,7 +19,7 @@ describe('public-catalog Function', () => {
 
     await expect(handler({ arguments: {} })).resolves.toEqual([
       expect.objectContaining({ slug: 'first' }),
-      expect.objectContaining({ slug: 'second', priceLabel: '$29.99', ratingLabel: '4.6' }),
+      expect.objectContaining({ slug: 'second', priceLabel: '$29.99', ratingLabel: '4.6', amazonAsin: 'B012345678', retailerUrl: 'https://www.amazon.com/dp/B012345678?tag=wantcove-20' }),
     ]);
     expect(send.mock.calls[0][0]).toBeInstanceOf(ScanCommand);
     expect(send.mock.calls[0][0].input.FilterExpression).toBe('#status = :published');
@@ -33,7 +33,7 @@ describe('public-catalog Function', () => {
     expect(send.mock.calls[0][0]).toBeInstanceOf(GetCommand);
   });
 
-  it('follows pagination without exposing internal fields', async () => {
+  it('follows pagination without exposing internal fields or unsafe retailer destinations', async () => {
     const send = vi.fn()
       .mockResolvedValueOnce({
         Items: [{ slug: 'first', name: 'First', status: 'PUBLISHED', internal: 'secret', amazonAsin: 'B012345678', retailerUrl: 'https://www.amazon.com/dp/B012345678' }],
@@ -47,7 +47,7 @@ describe('public-catalog Function', () => {
     const result = await handler({ arguments: {} }) as Record<string, unknown>[];
     expect(result).toHaveLength(2);
     expect(result[0]).not.toHaveProperty('internal');
-    expect(result[0]).not.toHaveProperty('amazonAsin');
+    expect(result[0]).toHaveProperty('amazonAsin', 'B012345678');
     expect(result[0]).not.toHaveProperty('retailerUrl');
     expect(send.mock.calls[1][0].input.ExclusiveStartKey).toEqual({ slug: 'first' });
   });

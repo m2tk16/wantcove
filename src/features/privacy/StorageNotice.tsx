@@ -10,7 +10,7 @@ export function StorageNotice() {
       <h2 id="storage-notice-title">Your privacy choices</h2>
       {choice !== 'pending' && <button type="button" aria-label="Close privacy choices" onClick={closeNotice}>×</button>}
     </div>
-    <p>WantCove can use functional browser storage for your theme and a pseudonymous AWS guest identity for likes. We do not use advertising cookies or your IP address to identify likes.</p>
+    <p>WantCove can use functional browser storage for your theme and a pseudonymous AWS guest identity for likes. Submitting the contact form also uses a guest identity for essential abuse protection. We do not use advertising cookies or raw IP addresses as application identifiers.</p>
     <div className="storage-actions">
       <button className="button" type="button" onClick={() => choose('preferences')}>Allow preferences</button>
       <button className="text-button" type="button" onClick={() => choose('essential')}>Essential only</button>

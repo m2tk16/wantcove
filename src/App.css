@@ -165,14 +165,30 @@ button { font:inherit; }
 .legal-content h2 { margin:0 0 14px; font-size:1.25rem; }
 .legal-content p { color:var(--text-subtle); line-height:1.75; }
 .legal-content a { color:var(--accent-strong); }
-.contact-page { max-width:960px; margin:0 auto; padding:80px clamp(20px,6vw,80px) 100px; }
-.contact-page>header { max-width:760px; padding-bottom:54px; }
-.contact-page h1 { margin:15px 0 18px; font-size:clamp(3rem,7vw,5.8rem); letter-spacing:-.065em; line-height:.95; }
-.contact-page>header>p { max-width:670px; color:var(--muted); font-size:1.08rem; line-height:1.65; }
-.contact-content { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
-.contact-content section { padding:24px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
-.contact-content h2 { margin:0 0 12px; font-size:1.05rem; }
-.contact-content p { margin:0; color:var(--text-subtle); font-size:.88rem; line-height:1.7; }
+.contact-page { max-width:1380px; margin:0 auto; padding:70px clamp(20px,5vw,78px) 100px; display:grid; grid-template-columns:minmax(300px,.8fr) minmax(480px,1.2fr); gap:clamp(48px,8vw,110px); align-items:start; }
+.contact-intro { position:sticky; top:120px; }
+.contact-intro h1 { margin:22px 0; font-size:clamp(4rem,7vw,7.5rem); letter-spacing:-.075em; line-height:.82; }
+.contact-intro>p { max-width:520px; color:var(--text-subtle); font-size:1.02rem; line-height:1.65; }
+.contact-notes { margin-top:42px; border:1px solid var(--line); border-radius:10px; }
+.contact-notes section { padding:20px 22px; display:grid; gap:5px; }
+.contact-notes section+section { border-top:1px solid var(--line); }
+.contact-notes strong { font-size:.85rem; }
+.contact-notes span,.contact-fallback { color:var(--text-subtle); font-size:.78rem; line-height:1.55; }
+.contact-fallback a,.contact-form a { color:var(--accent-strong); }
+.contact-form { padding:clamp(26px,4vw,48px); background:var(--surface); border:1px solid var(--line); border-radius:14px; }
+.contact-form header { padding-bottom:26px; border-bottom:1px solid var(--line); }
+.contact-form h2 { margin:10px 0 8px; font-size:clamp(2.2rem,4vw,4rem); letter-spacing:-.055em; }
+.contact-form header p { margin:0; color:var(--text-subtle); }
+.contact-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 18px; }
+.contact-form label { position:relative; margin-top:24px; display:grid; gap:8px; color:var(--text-subtle); font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.contact-form label>span { position:absolute; right:0; color:var(--muted); font-size:.6rem; }
+.contact-form input,.contact-form textarea { width:100%; padding:12px 13px; color:var(--text); background:var(--page); border:1px solid var(--line); border-radius:7px; font:inherit; font-size:.9rem; letter-spacing:normal; text-transform:none; }
+.contact-form textarea { resize:vertical; line-height:1.5; }
+.contact-form input:focus,.contact-form textarea:focus { border-color:var(--accent); outline:2px solid color-mix(in srgb,var(--accent) 28%,transparent); }
+.contact-privacy-note { margin:20px 0 0; color:var(--text-subtle); font-size:.74rem; line-height:1.55; }
+.contact-honeypot { position:absolute !important; left:-10000px; width:1px; height:1px; overflow:hidden; }
+.form-success { padding:11px 13px; color:#075b3a; background:#d7f5e6; border-radius:7px; font-size:.78rem; }
+:root[data-theme='dark'] .form-success { color:#baf3d8; background:#164735; }
 .drawer-backdrop { position:fixed; inset:0; z-index:50; background:rgba(4,12,17,.55); }
 .mobile-drawer { width:min(330px,86vw); height:100%; padding:24px; color:white; background:var(--dark); box-shadow:12px 0 35px rgba(0,0,0,.3); }
 .mobile-drawer>div { display:flex; align-items:center; justify-content:space-between; }
@@ -224,6 +240,9 @@ button:focus-visible,a:focus-visible { outline:3px solid var(--accent); outline-
   .site-footer .wordmark { justify-self:start; }
   .footer-legal { text-align:left; }
   .footer-legal nav { justify-content:flex-start; }
-  .contact-content { grid-template-columns:1fr; }
+  .contact-page { grid-template-columns:1fr; padding-top:44px; }
+  .contact-intro { position:static; }
+  .contact-form-grid { grid-template-columns:1fr; }
+  .contact-form .wide-field { grid-column:auto; }
   .storage-notice { right:16px; bottom:16px; }
 }

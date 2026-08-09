@@ -27,6 +27,8 @@ const testProducts: Product[] = [
     price: '$299.99',
     rating: '4.7',
     featuredRank: 2,
+    amazonAsin: 'B012345678',
+    retailerUrl: 'https://www.amazon.com/dp/B012345678?tag=wantcove-20',
   },
   {
     slug: 'portable-pizza-oven',
@@ -85,8 +87,9 @@ describe('WantCove discovery routes', () => {
   it('renders a product detail route with disclosure', () => {
     renderAt('/products/adjustable-dumbbell-set')
     expect(screen.getByRole('heading', { name: 'Adjustable Dumbbell Set' })).toBeInTheDocument()
-    expect(screen.getByText(/WantCove may earn a commission if you buy through them/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /view retailer/i })).toBeDisabled()
+    expect(screen.getByText(/WantCove may earn a commission if you buy through this link/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /view retailer/i })).toHaveAttribute('href', 'https://www.amazon.com/dp/B012345678?tag=wantcove-20')
+    expect(screen.getByRole('link', { name: /view retailer/i })).toHaveAttribute('rel', 'sponsored noopener noreferrer')
   })
 
   it('waits for the live catalog before deciding that a product deep link is missing', async () => {
@@ -146,6 +149,17 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByRole('heading', { name: /wandered off/i })).toBeInTheDocument()
   })
 
+  it('uses the same configured and live GraphQL categories for public category routes', () => {
+    const automotive = { ...testProducts[0], slug: 'floor-mats', name: 'Floor Mats', category: 'Automotive' }
+    const view = renderWithCatalog('/categories', testCatalog, [...testProducts, automotive])
+    expect(screen.getByRole('link', { name: /Automotive/i })).toHaveAttribute('href', '/categories/automotive')
+    view.unmount()
+    renderWithCatalog('/categories/automotive', testCatalog, [...testProducts, automotive])
+    expect(screen.getByRole('heading', { name: 'Automotive' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Floor Mats' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Levitating Globe Lamp' })).not.toBeInTheDocument()
+  })
+
   it('keeps the admin route out of public navigation and closed without backend configuration', async () => {
     const view = renderAt('/admin')
     expect(await screen.findByRole('heading', { name: 'Admin sign in' })).toBeInTheDocument()
@@ -162,10 +176,13 @@ describe('WantCove discovery routes', () => {
 
   it('keeps Contact, Terms, and Privacy available from the footer without primary navigation links', () => {
     const contactView = renderAt('/contact')
-    expect(screen.getByRole('heading', { name: 'Contact WantCove' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Email wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
-    expect(screen.getByText(/does not operate a website contact form/i)).toBeInTheDocument()
-    expect(screen.getByText(/never ask you to send a password or multifactor-authentication code/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /send us the signal/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /what should we know/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/email address/i)).toBeRequired()
+    expect(screen.getByLabelText(/^phone/i)).not.toBeRequired()
+    expect(screen.getByRole('button', { name: /send message/i })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
+    expect(screen.getByText(/never send passwords, authentication codes/i)).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/contact"]')).toBeNull()
     expect(screen.getByRole('navigation', { name: 'Legal and support' })).toBeInTheDocument()
     contactView.unmount()
@@ -187,14 +204,15 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/approximately 180 days/i)).toBeInTheDocument()
     expect(screen.getByText(/do not use a raw IP address as their application identifier/i)).toBeInTheDocument()
     expect(screen.getByText(/short-lived request counters/i)).toBeInTheDocument()
-    expect(screen.getByText(/operational metrics do not include the guest identity, product identifier, or IP address/i)).toBeInTheDocument()
+    expect(screen.getByText(/operational metrics do not include the guest identity, product identifier, message contents, or IP address/i)).toBeInTheDocument()
     expect(screen.getByText(/repeated attempts to save the same active like do not extend that period/i)).toBeInTheDocument()
-    expect(screen.getByText(/Rate-limit counters are set to expire approximately 10 minutes/i)).toBeInTheDocument()
+    expect(screen.getByText(/Like rate-limit counters expire approximately 10 minutes/i)).toBeInTheDocument()
+    expect(screen.getByText(/Website contact messages are set to expire approximately 90 days/i)).toBeInTheDocument()
     expect(screen.getByText(/Public user registration is disabled/i)).toBeInTheDocument()
     expect(screen.getByText(/time-based one-time-password multifactor authentication/i)).toBeInTheDocument()
     expect(screen.getByText(/short-lived recovery codes and replacement passwords/i)).toBeInTheDocument()
     expect(screen.getByText(/being developed from Tennessee, United States/i)).toBeInTheDocument()
-    expect(screen.getByText(/Google provides the Gmail service/i)).toBeInTheDocument()
+    expect(screen.getByText(/Google provides Gmail/i)).toBeInTheDocument()
     expect(screen.getByText(/Product images are served from WantCove's first-party `\/products\/` path/i)).toBeInTheDocument()
     expect(screen.getAllByText('August 8, 2026')).toHaveLength(1)
     expect(screen.getByRole('link', { name: 'wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
@@ -204,7 +222,7 @@ describe('WantCove discovery routes', () => {
   it('offers explicit storage choices and keeps essential-only preferences session based', () => {
     renderAt('/')
 
-    expect(screen.getByRole('dialog', { name: /your privacy choices/i })).toHaveTextContent(/do not use advertising cookies or your IP address/i)
+    expect(screen.getByRole('dialog', { name: /your privacy choices/i })).toHaveTextContent(/do not use advertising cookies or raw IP addresses/i)
     fireEvent.click(screen.getByRole('button', { name: /essential only/i }))
 
     expect(screen.queryByRole('dialog', { name: /your privacy choices/i })).not.toBeInTheDocument()

@@ -23,6 +23,8 @@ function parseProduct(value: unknown): Product | null {
     imageAlt: readString(record, 'imageAlt') ?? name,
     price: readString(record, 'priceLabel'),
     rating: readString(record, 'ratingLabel'),
+    amazonAsin: readString(record, 'amazonAsin'),
+    retailerUrl: readString(record, 'retailerUrl'),
     featuredRank: typeof record.featuredRank === 'number' ? record.featuredRank : undefined,
   }
 }

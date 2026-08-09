@@ -55,3 +55,19 @@ export type AdminProductGateway = {
   archive(slug: string): Promise<void>
   remove(slug: string): Promise<void>
 }
+
+export type AdminContactMessage = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  message: string
+  createdAt: string
+}
+
+export type AdminContactGateway = {
+  isAvailable: boolean
+  list(): Promise<AdminContactMessage[]>
+  remove(id: string): Promise<void>
+}

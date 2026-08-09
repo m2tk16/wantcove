@@ -1,5 +1,24 @@
 # WantCove project log
 
+## 2026-08-08 — Category, contact-form, and retailer-link correction candidate
+
+### Stage
+
+Local backend and UI candidate on `codex/catalog-contact-retailer-fixes`, based on PR #23 merge commit `cbe4fa3` and successful Amplify Beta job 38. No commit, push, pull request, cloud mutation, Beta deployment, `main` change, Production deployment, or contact-message record has been made by this candidate.
+
+### Corrected behavior
+
+- Replaced the public Categories page's disconnected static destinations with the same configured-plus-live Product category utility used by the admin dropdown. Live values are obtained from the existing public GraphQL/DynamoDB Product catalog, so a category such as Automotive appears without a second conflicting Category table; every category now has a filtered route and Home links use the same paths.
+- Replaced the primary `mailto:` experience with a responsive first name, last name, email, optional phone, and message form. The form preserves every value after an error and clears only after the backend accepts the submission. The monitored Gmail address remains a fallback and reply channel.
+- Added an identity-pool-authorized `submitContactMessage` GraphQL Function and an isolated DynamoDB inbox. The Function derives the actor from Cognito, charges malformed and honeypot requests to a five-per-ten-minute counter, stores no raw IP or actor identity with the message, uses server-generated identifiers, conditionally writes, expires messages after approximately 90 days, and applies bounded concurrency plus aggregate alarms. Only `ADMINS` can list or conditionally delete messages through the admin inbox.
+- Repaired retailer actions end to end: the public Function now projects a destination only after shared validation, the browser independently validates it, and product pages render a sponsored, opener-safe external link. Accepted destinations are HTTPS Amazon URLs with the exact `wantcove-20` tag or Amazon-issued `amzn.to` short links; untagged, deceptive, credentialed, custom-port, non-HTTPS, and non-Amazon URLs remain inert.
+
+### Policy, rollback, and verification
+
+- Updated Terms, Privacy, the storage notice, footer disclosure, legal steering, and the machine-readable readiness record for website contact processing and Beta retailer-link activation. `affiliateLaunch.linksEnabled` is now truthfully `true` while `approved` remains `false`, so Production release verification continues to fail closed alongside the existing legal-identity, jurisdiction, and qualified-review blockers.
+- Contact rollback removes the three contact operations, Function, table, monitoring, admin inbox, and form, then restores the mailbox-only policy language. Category rollback restores the prior static page. Retailer rollback removes the two projected fields and reinstates an inert action; stored Product records remain compatible in every case.
+- Backend TypeScript validation, the production build, warning-free lint, security/CI/hosting invariants, and 48 focused tests passed during development. The complete full gate then passed all 24 test files and 90 tests, production build, backend validation, and a read-only production dependency audit with 0 vulnerabilities. The first combined full-gate audit request was blocked by the sandbox network boundary; the isolated approved audit immediately succeeded without changing dependencies.
+
 ## 2026-08-08 — Contact and Beta administrator handoff accepted
 
 ### Stage

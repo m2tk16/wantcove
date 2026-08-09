@@ -83,7 +83,7 @@ export function ProductEditor({ product, busy, categories, onCancel, onSave }: {
       <label>Amazon ASIN<input maxLength={10} minLength={10} onChange={(event) => update('amazonAsin', event.target.value || undefined)} placeholder="B012345678" value={draft.amazonAsin ?? ''} /></label>
       <label>Amazon URL<input maxLength={2048} onChange={(event) => update('retailerUrl', event.target.value || undefined)} placeholder="https://www.amazon.com/…" type="url" value={draft.retailerUrl ?? ''} /></label>
     </div>
-    <p className="form-note">New products are always saved as drafts. Retailer URLs stay inactive on the public site until the affiliate launch gate is approved.</p>
+    <p className="form-note">New products are always saved as drafts. A published retailer action appears only for an HTTPS Amazon Special Link: either an Amazon URL carrying the <code>wantcove-20</code> tag or an Amazon-issued <code>amzn.to</code> short link.</p>
     <button className="button" disabled={busy} type="submit">{busy ? 'Saving…' : product ? 'Save changes' : 'Create draft'}</button>
   </form>
 }
