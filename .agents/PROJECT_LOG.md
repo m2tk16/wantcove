@@ -1,5 +1,19 @@
 # WantCove project log
 
+## 2026-08-08 — Contact and Beta administrator handoff accepted
+
+### Stage
+
+PR #22 merged to `beta` as `3b31d8e`. Amplify Beta job 37 completed `BUILD`, `DEPLOY`, and `VERIFY` successfully. Production, `main`, affiliate-link activation, and Production Cognito remain untouched.
+
+### Hosted acceptance
+
+- The owner signed in to hosted Beta as `wantcove@gmail.com` after private password recovery and completed the regular MFA challenge with the original Google Authenticator entry. The retained immutable Cognito subject and server-issued `ADMINS` membership continue to authorize the catalog workspace.
+- Hosted `https://beta.wantcove.com/contact` renders the monitored mailbox link, sensitive-data warning, Gmail and sender-provider disclosure, privacy-request guidance, and footer-only Contact navigation.
+- Hosted Terms and Privacy render the August 8 update, `wantcove@gmail.com` contact link, contact-message processing and retention disclosures, and the unchanged pre-release legal blockers.
+- No password, MFA seed, authentication code, session token, or presigned build URL was recorded in the repository. The discarded replacement Beta identity remains permanently deleted; no Production identity was created, updated, disabled, or removed.
+- The required GitHub `Branch policy check` and the candidate's complete fast gate passed before merge. Production readiness remains fail-closed on legal identity review, jurisdiction-specific review, and qualified legal review.
+
 ## 2026-08-08 — Public contact and administrator handoff candidate
 
 ### Stage
