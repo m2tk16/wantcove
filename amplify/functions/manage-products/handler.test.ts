@@ -92,7 +92,14 @@ describe('manage-products Function', () => {
 
     await expect(handler(event(productInput, viewerIdentity))).rejects.toThrow('Unauthorized');
     await expect(handler(event({ ...productInput, retailerUrl: 'https://example.com/item' }))).rejects.toThrow(/Amazon/);
+    await expect(handler(event({ ...productInput, retailerUrl: 'https://www.amazon.com/dp/B012345678' }))).rejects.toThrow(/wantcove-20/);
     expect(send).not.toHaveBeenCalled();
+  });
+
+  it('accepts an Amazon-issued short Special Link', async () => {
+    const send = vi.fn().mockResolvedValue({});
+    const handler = createManageProductsHandler(send);
+    await expect(handler(event({ ...productInput, retailerUrl: 'https://amzn.to/4fMjHIN' }))).resolves.toEqual(expect.objectContaining({ retailerUrl: 'https://amzn.to/4fMjHIN' }));
   });
 
   it('returns a bounded validation error when a manage-product slug is missing', async () => {

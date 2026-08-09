@@ -44,7 +44,7 @@ Owner-provided facts recorded 2026-08-07 and updated 2026-08-08:
 
 - Public operator/brand name: `WantCove`. The legal entity or individual identity behind that name has not been reviewed, so this is not a completed legal-identity record.
 - Location: Tennessee, United States. Applicable Tennessee and United States requirements, governing-law language, privacy rights, and dispute terms have not received jurisdiction-specific review.
-- Public contact: `wantcove@gmail.com`. On 2026-08-08 the owner confirmed that the mailbox was created and will be monitored for WantCove contact and privacy requests. It may be published as the active contact method. The website uses a `mailto:` handoff rather than a contact form; Google/Gmail and the sender's email provider process the resulting message.
+- Public contact: `wantcove@gmail.com`. On 2026-08-08 the owner confirmed that the mailbox was created and will be monitored for WantCove contact and privacy requests. The Beta candidate adds a website form backed by a restricted AWS GraphQL Function and DynamoDB inbox, with guest-identity rate limiting, 90-day message expiry, administrator deletion, and the mailbox retained as a fallback and reply channel. This is not Production-approved until the recorded jurisdiction and qualified reviews are complete.
 - Qualified legal review: not started.
 - Release status: Production and commercial affiliate links remain blocked. `.agents/PRODUCTION_READINESS.json` is the machine-readable source for this status, and `npm run verify:release` must fail until the required reviews and contact verification are truthfully complete.
 

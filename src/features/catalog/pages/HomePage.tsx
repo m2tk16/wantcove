@@ -2,7 +2,7 @@ import { Link } from '../../../shared/navigation/Link'
 import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductImage'
 import { useCatalog } from '../CatalogContext'
 import { ProductSection, SectionHeading } from '../components/ProductSection'
-import { categories } from '../data/categories'
+import { categoryPath, trackedProductCategories } from '../data/categories'
 
 const categoryIcons = ['◔', '✦', '◉', '▣', '⌂', '♨', '●', '▲', '◆', '◇', '☻']
 const featuredCategoryIcons = ['◉', '▣', '⌂', '♨', '●', '▲', '☻']
@@ -11,12 +11,15 @@ export function HomePage() {
   const { products, loading, error } = useCatalog()
   const featured = products[0]
   const newest = [...products].reverse().slice(0, 4)
+  const trackedCategories = trackedProductCategories(products)
 
   return <div className="catalog-layout">
     <aside className="category-rail" aria-label="Browse categories">
       <strong>Browse categories</strong>
-      {categories.map((category, index) => <Link to={index === 1 ? '/new-arrivals' : '/categories'} key={category}>
-        <span>{categoryIcons[index]}</span>{category}
+      <Link to="/top-picks"><span>{categoryIcons[0]}</span>Trending</Link>
+      <Link to="/new-arrivals"><span>{categoryIcons[1]}</span>New arrivals</Link>
+      {trackedCategories.map((category, index) => <Link to={categoryPath(category)} key={category}>
+        <span>{categoryIcons[(index + 2) % categoryIcons.length]}</span>{category}
       </Link>)}
     </aside>
     <div className="home-content">
@@ -47,7 +50,7 @@ export function HomePage() {
       <section className="category-section">
         <SectionHeading title="Browse by category" to="/categories" />
         <div className="category-circles">
-          {['Gadgets', 'Tech', 'Home', 'Kitchen', 'Fitness', 'Outdoors', 'Fun & weird'].map((category, index) => <Link to="/categories" key={category}>
+          {trackedCategories.slice(0, 7).map((category, index) => <Link to={categoryPath(category)} key={category}>
             <span>{featuredCategoryIcons[index]}</span><small>{category}</small>
           </Link>)}
         </div>

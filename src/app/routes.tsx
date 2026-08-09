@@ -1,7 +1,7 @@
 import { AdminPage } from '../features/admin/pages/AdminPage'
 import { AdminPasswordRecoveryPage } from '../features/admin/pages/AdminPasswordRecoveryPage'
 import { CategoriesPage } from '../features/catalog/pages/CategoriesPage'
-import { CatalogListing, ProductRoute } from '../features/catalog/pages/CatalogRoutes'
+import { CatalogListing, CategoryRoute, ProductRoute } from '../features/catalog/pages/CatalogRoutes'
 import { HomePage } from '../features/catalog/pages/HomePage'
 import { ContactPage } from '../features/contact/pages/ContactPage'
 import { PrivacyPage } from '../features/legal/pages/PrivacyPage'
@@ -10,6 +10,7 @@ import { NotFoundPage } from '../shared/pages/NotFoundPage'
 
 export function resolveRoute(path: string) {
   if (path.startsWith('/products/')) return <ProductRoute slug={path.slice('/products/'.length)} />
+  if (path.startsWith('/categories/')) return <CategoryRoute slug={path.slice('/categories/'.length)} />
 
   switch (path) {
     case '/': return <HomePage />

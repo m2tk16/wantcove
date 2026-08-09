@@ -12,7 +12,7 @@ const publishedProduct = {
   ratingLabel: '4.8',
   featuredRank: 4,
   amazonAsin: 'B012345678',
-  retailerUrl: 'https://www.amazon.com/dp/B012345678',
+  retailerUrl: 'https://www.amazon.com/dp/B012345678?tag=wantcove-20',
 }
 
 describe('parsePublicCatalogPayload', () => {
@@ -26,6 +26,8 @@ describe('parsePublicCatalogPayload', () => {
       imageAlt: publishedProduct.imageAlt,
       price: publishedProduct.priceLabel,
       rating: publishedProduct.ratingLabel,
+      amazonAsin: publishedProduct.amazonAsin,
+      retailerUrl: publishedProduct.retailerUrl,
       featuredRank: publishedProduct.featuredRank,
     }])
   })

@@ -8,6 +8,7 @@ import {
   TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { AppSyncIdentity, AppSyncResolverHandler } from 'aws-lambda';
+import { normalizeAmazonSpecialLink } from '../../shared/amazon-retailer';
 import { STARTER_PRODUCTS } from './starter-products';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
@@ -100,21 +101,6 @@ function requireString(value: string | null | undefined, label: string, min: num
   return normalized;
 }
 
-function requireHttpsUrl(value: string | null | undefined, label: string) {
-  const raw = requireString(value, label, 1, 2_048);
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    throw new Error(`${label} must be a valid URL.`);
-  }
-  if (url.protocol !== 'https:' || url.username || url.password) {
-    throw new Error(`${label} must use HTTPS and must not contain credentials.`);
-  }
-  if (url.port) throw new Error(`${label} must not use a custom port.`);
-  return url;
-}
-
 function requireImageLocation(value: string | null | undefined) {
   const raw = requireString(value, 'Image location', 1, 2_048);
   if (!FIRST_PARTY_PRODUCT_IMAGE_PATTERN.test(raw)) {
@@ -130,12 +116,8 @@ function optionalDisplayLabel(value: string | null | undefined, label: string, m
 
 function optionalAmazonUrl(value: string | null | undefined) {
   if (!value?.trim()) return undefined;
-  const url = requireHttpsUrl(value, 'Retailer URL');
-  const host = url.hostname.toLowerCase();
-  if (host !== 'amazon.com' && !host.endsWith('.amazon.com') && host !== 'amzn.to') {
-    throw new Error('Retailer URL must use an Amazon or amzn.to host.');
-  }
-  return url.toString();
+  if (value.trim().length > 2_048) throw new Error('Retailer URL must be 2048 characters or fewer.');
+  return normalizeAmazonSpecialLink(value);
 }
 
 function optionalAsin(value: string | null | undefined) {

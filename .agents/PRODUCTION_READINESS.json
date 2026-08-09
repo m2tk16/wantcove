@@ -20,6 +20,6 @@
   },
   "affiliateLaunch": {
     "approved": false,
-    "linksEnabled": false
+    "linksEnabled": true
   }
 }

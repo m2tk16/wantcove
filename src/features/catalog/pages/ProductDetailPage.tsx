@@ -3,14 +3,17 @@ import { ResponsiveProductImage } from '../../../shared/media/ResponsiveProductI
 import { LikeButton } from '../../likes/LikeButton'
 import { useCatalog } from '../CatalogContext'
 import { ProductSection } from '../components/ProductSection'
+import { categoryPath } from '../data/categories'
+import { safeRetailerUrl } from '../retailerLinks'
 import type { Product } from '../types'
 
 export function ProductDetailPage({ product }: { product: Product }) {
   const { products } = useCatalog()
   const related = products.filter((item) => item.slug !== product.slug).slice(0, 3)
+  const retailerUrl = safeRetailerUrl(product.retailerUrl)
 
   return <div className="product-page">
-    <div className="breadcrumbs"><Link to="/">Home</Link><span>›</span><Link to="/categories">{product.category}</Link><span>›</span><span>{product.name}</span></div>
+    <div className="breadcrumbs"><Link to="/">Home</Link><span>›</span><Link to={categoryPath(product.category)}>{product.category}</Link><span>›</span><span>{product.name}</span></div>
     <div className="product-detail">
       <div className="product-gallery">
         <div className="thumbnail-column">
@@ -31,8 +34,8 @@ export function ProductDetailPage({ product }: { product: Product }) {
         <strong className="detail-price">{product.price ?? 'Curated find'}</strong>
         <p>{product.description}</p>
         <ul><li>Curated for design and usefulness</li><li>Retailer details are reviewed before launch</li><li>Like privately to revisit later</li></ul>
-        <button className="button buy-button" type="button" disabled>View retailer <span>↗</span></button>
-        <p className="affiliate-disclosure"><strong>Affiliate disclosure:</strong> When retailer links are enabled, WantCove may earn a commission if you buy through them, at no added cost to you. You will leave WantCove, and the retailer controls checkout and its privacy practices.</p>
+        {retailerUrl ? <a className="button buy-button" href={retailerUrl} rel="sponsored noopener noreferrer" target="_blank">View retailer <span>↗</span></a> : <button className="button buy-button" type="button" disabled>Retailer link unavailable</button>}
+        <p className="affiliate-disclosure"><strong>Affiliate disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. WantCove may earn a commission if you buy through this link, at no added cost to you. You will leave WantCove, and Amazon controls checkout and its privacy practices.</p>
       </section>
     </div>
     <ProductSection title="You might also like" products={related} />
