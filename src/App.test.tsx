@@ -160,7 +160,16 @@ describe('WantCove discovery routes', () => {
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/admin/forgot-password"]')).toBeNull()
   })
 
-  it('keeps Terms and Privacy available from the footer without primary navigation links', () => {
+  it('keeps Contact, Terms, and Privacy available from the footer without primary navigation links', () => {
+    const contactView = renderAt('/contact')
+    expect(screen.getByRole('heading', { name: 'Contact WantCove' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Email wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
+    expect(screen.getByText(/does not operate a website contact form/i)).toBeInTheDocument()
+    expect(screen.getByText(/never ask you to send a password or multifactor-authentication code/i)).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/contact"]')).toBeNull()
+    expect(screen.getByRole('navigation', { name: 'Legal and support' })).toBeInTheDocument()
+    contactView.unmount()
+
     const view = renderAt('/terms')
     expect(screen.getByRole('heading', { name: 'Terms of Service' })).toBeInTheDocument()
     expect(screen.getAllByText('As an Amazon Associate I earn from qualifying purchases.')).toHaveLength(2)
@@ -168,8 +177,8 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/Password recovery does not remove MFA/i)).toBeInTheDocument()
     expect(screen.getByText(/being developed from Tennessee, United States/i)).toBeInTheDocument()
     expect(screen.getByText(/WantCove is the recorded public operator name/i)).toBeInTheDocument()
-    expect(screen.queryByText(/wantcove@gmail\.com/i)).not.toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: 'Legal' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
+    expect(screen.getByRole('navigation', { name: 'Legal and support' })).toBeInTheDocument()
     view.unmount()
 
     renderAt('/privacy')
@@ -185,10 +194,10 @@ describe('WantCove discovery routes', () => {
     expect(screen.getByText(/time-based one-time-password multifactor authentication/i)).toBeInTheDocument()
     expect(screen.getByText(/short-lived recovery codes and replacement passwords/i)).toBeInTheDocument()
     expect(screen.getByText(/being developed from Tennessee, United States/i)).toBeInTheDocument()
-    expect(screen.getByText(/No planned but unavailable or unmonitored address/i)).toBeInTheDocument()
+    expect(screen.getByText(/Google provides the Gmail service/i)).toBeInTheDocument()
     expect(screen.getByText(/Product images are served from WantCove's first-party `\/products\/` path/i)).toBeInTheDocument()
     expect(screen.getAllByText('August 8, 2026')).toHaveLength(1)
-    expect(screen.queryByText(/wantcove@gmail\.com/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'wantcove@gmail.com' })).toHaveAttribute('href', 'mailto:wantcove@gmail.com')
     expect(screen.queryByRole('navigation', { name: 'Primary navigation' })?.querySelector('a[href="/privacy"]')).toBeNull()
   })
 

@@ -6,8 +6,8 @@
   },
   "contact": {
     "plannedEmail": "wantcove@gmail.com",
-    "verified": false,
-    "monitored": false
+    "verified": true,
+    "monitored": true
   },
   "jurisdiction": {
     "country": "United States",

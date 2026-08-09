@@ -164,6 +164,15 @@ button { font:inherit; }
 .legal-content section { padding:30px 0; border-bottom:1px solid var(--line); }
 .legal-content h2 { margin:0 0 14px; font-size:1.25rem; }
 .legal-content p { color:var(--text-subtle); line-height:1.75; }
+.legal-content a { color:var(--accent-strong); }
+.contact-page { max-width:960px; margin:0 auto; padding:80px clamp(20px,6vw,80px) 100px; }
+.contact-page>header { max-width:760px; padding-bottom:54px; }
+.contact-page h1 { margin:15px 0 18px; font-size:clamp(3rem,7vw,5.8rem); letter-spacing:-.065em; line-height:.95; }
+.contact-page>header>p { max-width:670px; color:var(--muted); font-size:1.08rem; line-height:1.65; }
+.contact-content { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.contact-content section { padding:24px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.contact-content h2 { margin:0 0 12px; font-size:1.05rem; }
+.contact-content p { margin:0; color:var(--text-subtle); font-size:.88rem; line-height:1.7; }
 .drawer-backdrop { position:fixed; inset:0; z-index:50; background:rgba(4,12,17,.55); }
 .mobile-drawer { width:min(330px,86vw); height:100%; padding:24px; color:white; background:var(--dark); box-shadow:12px 0 35px rgba(0,0,0,.3); }
 .mobile-drawer>div { display:flex; align-items:center; justify-content:space-between; }
@@ -215,5 +224,6 @@ button:focus-visible,a:focus-visible { outline:3px solid var(--accent); outline-
   .site-footer .wordmark { justify-self:start; }
   .footer-legal { text-align:left; }
   .footer-legal nav { justify-content:flex-start; }
+  .contact-content { grid-template-columns:1fr; }
   .storage-notice { right:16px; bottom:16px; }
 }

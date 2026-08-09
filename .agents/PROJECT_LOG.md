@@ -1,5 +1,38 @@
 # WantCove project log
 
+## 2026-08-08 — Public contact and administrator handoff candidate
+
+### Stage
+
+Frontend, policy, and operational candidate on `codex/contact-admin-migration`, based on PR #21 merge commit `49132e7` and successful Amplify Beta job 36, prepared for protected review into `beta`. No frontend deployment, Production change, or affiliate activation has been made by this candidate. The Beta Cognito handoff described below is the only cloud mutation.
+
+### Owner-confirmed facts and implementation
+
+- The owner confirmed that `wantcove@gmail.com` now exists and will be monitored as WantCove's public contact and privacy-request mailbox, and requested that it replace `m2tk16@gmail.com` as the restricted administrator identity.
+- Added a footer-only `/contact` route with a direct `mailto:` handoff, privacy-request guidance, and a warning never to email passwords, MFA codes, payment details, tax information, government identifiers, or unnecessary sensitive information.
+- The page creates no contact form, public GraphQL mutation, DynamoDB record, cookie, or website-side message store. It accurately identifies Google/Gmail and the sender's email provider as processors of message contents and delivery metadata.
+- Updated Terms and Privacy together with the new public contact behavior, including use, provider sharing, retention, and request-channel disclosures. The machine-readable readiness record now reflects the owner-confirmed monitored mailbox; legal identity, jurisdiction-specific review, and qualified legal review remain fail-closed Production blockers.
+
+### Administrator migration boundary
+
+- Application authorization remains based on the server-issued Cognito `ADMINS` claim, not a hard-coded email address. No application authorization code changes are required to change the administrator mailbox.
+- CloudFormation identified the isolated Beta pool as `us-east-1_mp5CMolaz` and Production pool as `us-east-1_lh6gTTTXD`. Targeted CLI reads could not complete because this workstation attempted an unreachable IPv6 path, so the signed-in AWS Console was used to inspect and mutate the exact Beta pool rather than issuing a blind request.
+- The Beta pool initially contained only the enabled, confirmed `m2tk16@gmail.com` account. Cognito then sent an invitation to `wantcove@gmail.com` with an AWS-generated temporary password. The replacement is enabled, email-verified, in `FORCE_CHANGE_PASSWORD`, and a member of `ADMINS`. No temporary password, permanent password, QR seed, MFA code, or session token was viewed or handled by the project workflow.
+- Production remains untouched. The previous Beta administrator also remains enabled and confirmed until the replacement privately completes password replacement, TOTP enrollment, and an authenticated catalog-access check.
+- The safe handoff order is invite the replacement separately in each pool, add `ADMINS`, complete first-login password replacement and TOTP privately, prove catalog access in both stages, disable the old user, verify continuity, and only then delete the old user. The existing account remains untouched until the replacement is proven.
+
+### Verification and rollback
+
+- Added route coverage for the footer-only Contact link, mail action, provider disclosure, sensitive-data warning, and absence from primary navigation. Updated legal-route assertions for the live mailbox and Gmail disclosure.
+- The changed UI, readiness-policy, and infrastructure tests passed together (16 tests). The complete normal gate then passed steering, backend-security, CI, hosting, warning-free lint, and all 72 tests. An earlier complete test run hit the previously observed five-second CDK cold-start timeout; that test passed immediately in the focused run and in the successful repeated complete gate.
+- The Beta invitation and `ADMINS` membership are verified in Cognito. Hosted acceptance now awaits the owner's private first-login password replacement, TOTP enrollment, and confirmation that the admin session displays `wantcove@gmail.com` with `MFA-protected · ADMINS group`.
+- The owner completed the permanent-password challenge privately. Cognito now reports the replacement as enabled and `CONFIRMED` with verified email and `ADMINS` membership, proving that the invitation and password replacement succeeded. The first TOTP verification attempt was rejected and Cognito still reports no associated MFA method, so acceptance remains open specifically on authenticator association. The displayed one-time code was treated as exposed, was not copied into the repository or log, and must not be reused.
+- A second fresh-code attempt in the same unverified association was rejected. The existing Beta administrator remains signed in with working TOTP and `ADMINS`, so the hosted authentication path and operational access remain available. The failed association should be abandoned; the replacement must begin a new sign-in with its permanent password, receive a fresh Cognito setup key, and create a distinct time-based SHA-1 authenticator entry before another verification attempt.
+- After three rejected Google Authenticator association attempts, the owner approved a safer Beta-only alias migration that retained the already-proven Cognito identity instead of replacing its password, TOTP enrollment, group membership, or immutable subject. The incomplete replacement identity `8478f4f8-00c1-70c3-347a-10dd48ad26b5` was exact-target verified, disabled, and permanently deleted to free the unique email alias.
+- Cognito then updated the original enabled, confirmed administrator `24287428-80d1-70e0-1b91-b1eb129b12cb` from `m2tk16@gmail.com` to the verified `wantcove@gmail.com` alias. Post-mutation inspection confirmed the same immutable subject remains enabled, confirmed, email-verified, and a member of `ADMINS`. Production remains untouched; Beta hosted sign-in with the new alias and the identity's existing private password and Google Authenticator entry is the remaining acceptance check.
+- Hosted Beta acceptance passed. After privately resetting the retained identity's password, the owner signed in as `wantcove@gmail.com` and completed the normal security-code challenge with the original Google Authenticator entry. This proves that the verified alias, password recovery, retained TOTP association, immutable subject, and `ADMINS` authorization continue to work together. No password or authentication code was shared or captured. Production remains untouched.
+- Rollback for the frontend is a reviewed removal of the Contact route/link and restoration of the prior policy/readiness facts. Beta account rollback would change the verified alias on the same immutable administrator subject back to the prior mailbox; it must not recreate the failed replacement identity or alter the proven password, TOTP enrollment, or `ADMINS` membership. This corrects the earlier rollback description now that the incomplete replacement has been removed.
+
 This append-only log is the project’s restart and recovery record. Add the newest entry directly below this introduction. Do not rewrite older entries except to correct a factual error and note the correction.
 
 ## 2026-08-08 — Tracked category picker candidate

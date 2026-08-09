@@ -16,14 +16,12 @@ function readyProfile() {
 }
 
 describe('Production readiness policy', () => {
-  it('keeps the current release blocked on every unresolved owner-supplied item', () => {
-    expect(validateProductionReadiness(currentProfile)).toEqual(expect.arrayContaining([
+  it('keeps the current release blocked only on the remaining unresolved items', () => {
+    expect(validateProductionReadiness(currentProfile)).toEqual([
       'The operator legal identity has not been reviewed.',
-      'The public contact email has not been verified.',
-      'The public contact email is not recorded as monitored.',
       'Jurisdiction-specific requirements have not been reviewed.',
       'Qualified legal review is not complete.',
-    ]))
+    ])
   })
 
   it('accepts a complete noncommercial Production Preview profile', () => {
