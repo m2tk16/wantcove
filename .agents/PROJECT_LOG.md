@@ -1,5 +1,33 @@
 # WantCove project log
 
+## 2026-08-08 — Non-legal Beta closeout and Production inventory
+
+### Stage
+
+PR #25 merged to `beta` as `9cd0a39`, and Amplify Beta job 40 completed `BUILD`, `DEPLOY`, and `VERIFY` successfully. This closeout is documentation and read-only inventory only: `main`, Production infrastructure, Production identities, and Production data remain unchanged.
+
+### Beta acceptance
+
+- A synthetic visitor message was submitted through hosted `https://beta.wantcove.com/contact`, accepted by the public GraphQL contact endpoint, and displayed in the signed-in, MFA-protected Admin inbox.
+- The exact synthetic record was removed through the inbox's two-step delete confirmation and was no longer present after the list refreshed. No real visitor message was edited or deleted.
+- This closes the remaining submit, restricted-read, and delete acceptance item for the Beta contact path. The Admin inbox remains the authoritative delivery channel; Gmail duplication remains deferred.
+
+### Deferred legal work and preserved gate
+
+- The owner explicitly deferred legal-identity, Tennessee/United States jurisdiction, and qualified-review work while the site has no intended audience. The deferral does not complete, waive, or bypass those requirements.
+- `.agents/PRODUCTION_READINESS.json` remains truthful: legal identity is unverified, jurisdiction and qualified legal review are not started, affiliate launch approval is false, and retailer links are enabled in Beta. `npm run verify:release` therefore continues to fail closed for Production.
+
+### Read-only Production inventory
+
+- The isolated Production Cognito pool `us-east-1_lh6gTTTXD` contains no users and no groups. The Beta administrator was not copied, and no Production administrator was created during this audit.
+- The Production Amplify backend is still the earlier Collection-era deployment. Its CloudFormation inventory has no Product catalog nested stack and none of the later Beta contact/catalog resources; the current Beta application cannot be treated as already initialized in Production.
+- The safe promotion order is: resolve or intentionally disable the Production affiliate-link gate; complete the protected `beta` to `main` release gate and deployment; create and privately prove `wantcove@gmail.com` with TOTP plus server-issued `ADMINS` membership in the Production pool; migrate only the intended Product catalog; then run hosted catalog, retailer-link, contact submit/read/delete, admin-auth, and synthetic-record cleanup checks. Contact messages, likes, sessions, and other Beta-only data must not be copied.
+
+### Verification
+
+- Hosted Beta contact submit, protected Admin read, two-step delete, and post-delete absence passed with a synthetic record.
+- The AWS Console inventory was read-only. Local AWS CLI queries could not authenticate in this shell because no CLI credentials are configured; the existing signed-in Console session was used instead.
+
 ## 2026-08-08 — Contact inbox Beta deployment and notification decision
 
 ### Stage
